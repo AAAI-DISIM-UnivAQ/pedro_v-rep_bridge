@@ -1,5 +1,7 @@
 # A template for connecting between teleor and VREP via Pedro
 
+# from P. Robinson contribution
+
 # For a given system we need:
 # an agreed collection of percepts
 # an agreed set of commands
@@ -88,12 +90,12 @@ class Vrep_Pedro(object):
     def __init__(self, vrep_client_id):
         self.vrep_client_id = vrep_client_id
         self.tr_client_addr = None
-        self.client = pedroclient.PedroClient('127.0.0.1') #("192.168.0.153")
+        self.client = pedroclient.PedroClient()
         # register vrep_pedro as the name of this process with Pedro
         self.client.register("vrep_pedro")
         self.message_thread = MessageThread(self)
         self.message_thread.start()
-        self.set_client('127.0.0.1')
+        self.set_client("['127.0.0.1']")
 
     # def methods for sensing and acting to the robot in the simulator
     def move_forward(self, speed):
@@ -132,11 +134,10 @@ while True:
     if sensor[1]>0:
         percept = '[touching()]'
     else:
-        percept = '[free()]'
+        percept = '[]'
     vrep_pedro.send_percept(percept)
     time.sleep(1)
 
-# e.g. clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5)
 
 # Here we need a VREP simulation loop
 # I presume that in this loop we can step through the simulation
