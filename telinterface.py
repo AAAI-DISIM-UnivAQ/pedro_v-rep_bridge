@@ -1,6 +1,6 @@
 # A template for connecting between teleor and VREP via Pedro
 
-# from P. Robinson contribution
+# from a P. Robinson proposal
 
 # For a given system we need:
 # an agreed collection of percepts
