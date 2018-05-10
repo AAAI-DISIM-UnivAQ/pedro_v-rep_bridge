@@ -1,3 +1,5 @@
+# Partly provided by P. Robinson
+
 # A template for connecting between teleor and VREP via Pedro
 
 # For a given system we need:
