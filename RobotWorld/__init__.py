@@ -1,151 +1,107 @@
-# Partly provided by P. Robinson
+# coding : utf-8
 
-# A template for connecting between teleor and VREP via Pedro
+'''
+Copyright 2017-2018 Agnese Salutari.
+Licensed under the Apache License, Version 2.0 (the "License"); 
+you may not use this file except in compliance with the License. 
+You may obtain a copy of the License at
 
-# For a given system we need:
-# an agreed collection of percepts
-# an agreed set of commands
-# The idea is once the simulation is running in a loop
-# we will be asking VREP for percepts in whatever form is best suited for
-# VREP then translating (or possibly summarizing) these percepts into
-# percept terms that teleo understands and sending them to the teleo agent
-# via Pedro eg see(table, 10, 0)  (meaning seeing a table at 10 distance units
-# dead ahead (0 degrees))
-# The teleo agent will respond with commands - as in the example code below
-# that are processed by the message thread
+http://www.apache.org/licenses/LICENSE-2.0
 
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on 
+an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+See the License for the specific language governing permissions and limitations under the License
+'''
 
-import pedroclient
-
-import threading
-import RobotWorld
 import time
+import os
+import ctypes as ct
+import platform
+import vrepConst
 
-# Handling messages from the TR program
-class MessageThread(threading.Thread):
-    def __init__(self, parent):
-        self.running = True
-        self.parent = parent
-        threading.Thread.__init__(self)
-        self.daemon = True
-
-    def run(self):
-        while self.running:
-            p2pmsg = self.parent.client.get_term()[0]
-            # get the message
-            message = p2pmsg.args[2]
-            if str(message) == 'initialise_':
-                # get the sender address
-                percepts_addr = p2pmsg.args[1]
-                self.parent.set_client(percepts_addr)
-                # VREP code goes here so the visualization can
-                # send back any initial percepts (iniital state)
-                # create a string representing a list of initial percepts
-                # say init_percepts and call
-                # self.parent.send_percept(init_percepts)
-                init_percepts = ''
-                self.parent.send_percept(init_percepts)
-                continue
-            # As an example the teleor agent messages might be of the form
-            # start_(move(lin_vel, ang_vel)) - starts a move
-            # mod_(move(lin_vel, ang_vel)) - modify the velocities
-            # stop_(move(lin_vel, ang_vel)) - stop moving
-            if message.get_type() != pedroclient.PObject.structtype:
-                continue
-            functor = message.functor
-            if functor.get_type() != pedroclient.PObject.atomtype:
-                continue
-            cmd_type = functor.val
-            cmd = message.args[0]
-            if cmd.get_type() != pedroclient.PObject.structtype:
-                continue
-            if cmd_type == 'stop_':
-                if cmd.functor.val == 'move' and cmd.arity() == 2:
-                    # translate the stop message as appropriate
-                    # for VREP sending via self.vrep_client_id
-                    pass
-            elif cmd_type in ['start_', 'mod_']:
-                if cmd.functor.val == 'move' and cmd.arity() == 2:     
-                    linear_vel = cmd.args[0].val
-                    angular_vel = cmd.args[1].val
-                    # send new linear_vel, angular_vel to
-                    # self.vrep_client_id
-            
-    def stop(self):
-        self.running = False
+try:
+    import vrep
+except:
+    print ('--------------------------------------------------------------')
+    print ('"vrep.py" could not be imported. This means very probably that')
+    print ('either "vrep.py" or the remoteApi library could not be found.')
+    print ('Make sure both are in the same folder as this file,')
+    print ('or appropriately adjust the file "vrep.py"')
+    print ('--------------------------------------------------------------')
+    print ('')
 
 
-class Vrep_Pedro(object):
+class World(object):
 
-    # sensors:
-    # touching()
-    #
+    '''
+    Robot simulator class to communicate with the simulation environment
+    '''
 
-    # motion:
-    # move_forward(speed)
-    # stop()
-    # turnLeft(angleSpeed)
-    # turnRight(angleSpeed)
+    __host = None
+    __portNumber = None
+    __clientID = None
 
-    def __init__(self, vrep_client_id):
-        self.vrep_client_id = vrep_client_id
-        self.tr_client_addr = None
-        self.client = pedroclient.PedroClient('127.0.0.1') #("192.168.0.153")
-        # register vrep_pedro as the name of this process with Pedro
-        self.client.register("vrep_pedro")
-        self.message_thread = MessageThread(self)
-        self.message_thread.start()
-        self.set_client('127.0.0.1')
+    def __init__(self, host='127.0.0.1', portNumber=19997):
+        self.__host = host
+        self.__port = portNumber
+        self._rightWheel = None
+        self._leftWheel = None
 
-    # def methods for sensing and acting to the robot in the simulator
-    def move_forward(self, speed):
-        self.vrep_client_id.act('move', {'left':speed, 'right':speed})
+    def connect(self):
+        '''
+        Connect with V-REP Simulator.
+        :return: True if the connection has been established, False otherwise.
+        '''
+        # just in case, close all opened connections
+        vrep.simxFinish(-1)
+        # Connect to V-REP
+        self.__clientID = vrep.simxStart(self.__host, self.__port, True, True, 5000, 5)
+        # check clientID for a good connection...
+        if self.__clientID == -1:
+            return False
+        else:
+            state, self._rightWheel = vrep.simxGetObjectHandle(self.__clientID, 'dr12_rightWheel_', vrep.simx_opmode_blocking)
+            state, self._leftWheel = vrep.simxGetObjectHandle(self.__clientID, 'dr12_leftWheel_', vrep.simx_opmode_blocking)
+            return True
 
-    def stop_move(self):
-        self.vrep_client_id.act('move', {'left':0, 'right':0})
+    def act(self, command, dParams):
+        '''
+        Implements action commands in the robot world
+        :param command: action command to execute
+        :param dParams: action parameters
+        :return: True is action was actuated
+        '''
+        assert isinstance(command, str)
+        assert isinstance(dParams, dict)
+        out = True
+        if command == 'move':
+            vrep.simxsetJointTargetVelocity(self._rightWheel, dParams['right'])
+            vrep.simxsetJointTargetVelocity(self._leftWheel, dParams['left'])
+        return out
 
-    def turn_left(self, angleSpeed):
-        self.vrep_client_id.act('move', {'left':angleSpeed, 'right':0})
+    def sense(self, sensorName):
+        '''
+        Implements sensor reading from the robot simulator
+        :param sensorName: name of the sensor as defined in the simulator
+        :return: out:
+            The 1st element of out is the state of the reading on the sensor (0 os ok).
+            The 2nd element of out is a Boolean that says if the sensor is detecting something in front of it.
+            The 3rd element of out is the point of the detected object.
+            The 4th element of out is the handle of the detected object.
+            The 5th element of out is the normal vector of the detected surface.
+        '''
+        assert isinstance(sensorName, str)
+        state, handle = vrep.simxGetObjectHandle(self.__clientID, sensorName, vrep.simx_opmode_blocking)
+        out = vrep.simxReadForceSensor(self.__clientID, handle, vrep.simx_opmode_blocking)
+        return out
 
-    def turn_right(self, angleSpeed):
-        self.vrep_client_id.act('move', {'left': 0, 'right': angleSpeed})
+    def close(self):
+        '''
+        Close connection with the robot simulation
+        :return:
+        '''
+        # Before closing the connection to V-REP, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
+        vrep.simxGetPingTime(self.__clientID)
+        # Now close the connection to V-REP:
+        vrep.simxFinish(self.__clientID)
 
-    def set_client(self, addr):
-        self.tr_client_addr = addr
-
-    def send_percept(self, percepts_string):
-        if self.client.p2p(self.tr_client_addr, percepts_string) == 0:
-            print("Error", percepts_string)
-
-    def exit(self):
-        self.message_thread.stop()
-        self.client.p2p("messages:"+self.tr_client_addr,  "quiting")
-        
-# Initialize connection to VREP setting vrep_client_id 
-# require VREP init code to go here
-
-# this client_id is passed to the constructor below
-vrep_client_id = RobotWorld.World(host='127.0.0.1', portNumber=19997)
-vrep_pedro =  Vrep_Pedro(vrep_client_id)
-vrep_client_id.connect()
-
-while True:
-    sensor = vrep_client_id.sense('dr12_bumper_')
-    if sensor[1]>0:
-        percept = '[touching()]'
-    else:
-        percept = '[free()]'
-    vrep_pedro.send_percept(percept)
-    time.sleep(1)
-
-# e.g. clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5)
-
-# Here we need a VREP simulation loop
-# I presume that in this loop we can step through the simulation
-# and ask VREP for required percepts (in whatever form is easiest)
-# and then convert to a percept string e.g.:
-# "[see(table, 10, 0), touching(left)]"
-# can be sent as
-# vrep_pedro.send_percept("[see(table, 10, 0), touching(left)]")
-# When we want to finish the simulation we want to call
-# vrep_pedro.exit()
