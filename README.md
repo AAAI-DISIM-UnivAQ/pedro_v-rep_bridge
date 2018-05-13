@@ -26,7 +26,7 @@ Check the [vrep-api-python](https://github.com/Troxid/vrep-api-python) for detai
 
 ## Robot control protocol
 
-The robot is controlled by the ROBOT redis channel and send its sensor readings to the ROBOT:PERCEPTS redis channel.
+The robot is controlled by the __ROBOT__ redis channel,  while it sends its sensor readings to the __ROBOT:PERCEPTS__ redis channel.
 
 ### Protocol
 
