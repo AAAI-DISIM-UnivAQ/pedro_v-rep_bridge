@@ -23,3 +23,28 @@ Like any V-REP project, you have to put the following files in the working direc
 -  simpleTest.py (or any other example file) to test remote API functionality
 
 Check the [vrep-api-python](https://github.com/Troxid/vrep-api-python) for details
+
+## Robot control protocol
+
+The robot is controlled by the ROBOT redis channel and send its sensor readings to the ROBOT:PERCEPTS redis channel.
+
+### Protocol
+
+__Percepts__:
+
+    sonar( Ld, Rd)
+
+* Ld Left distance
+* Rd Right distance
+
+of type floating point, meters fro obstacles. Became very large to represent nothing (+ infinity)
+
+
+__Actions__:
+
+    rotate_right(speed)
+    rotate_left(speed)
+    move_forward(speed)
+    move_backward(speed)
+
+of type floating point, meters per seconds.
