@@ -52,7 +52,7 @@ class PioneerP3DX:
 
 def demo_control():
     with VRep.connect("127.0.0.1", 19999) as api:
-        r = PioneerP3DX(api)
+        r = PioneerP3DX('Pioneer_p3dx', api)
         speed = 0.0
         while True:
             rl = r.right_length()
