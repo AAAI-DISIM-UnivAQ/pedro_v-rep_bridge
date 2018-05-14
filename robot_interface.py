@@ -51,7 +51,7 @@ class PioneerP3DX:
         return self._left_sensor.read()[1].distance()
 
 def demo_control():
-    with VRep.connect("127.0.0.1", 19997) as api:
+    with VRep.connect("127.0.0.1", 19999) as api:
         r = PioneerP3DX(api)
         speed = 0.0
         while True:
@@ -82,7 +82,7 @@ def invoke(obj, method_string):
         raise NotImplementedError("Class `{}` does not implement `{}`".format(obj.__class__.__name__, method_name))
 
 def redis_control():
-    with VRep.connect("127.0.0.1", 19997) as api:
+    with VRep.connect("127.0.0.1", 19999) as api:
         r = PioneerP3DX('Pioneer_p3dx', api)
         Red = Redis()
         pubsub = Red.pubsub()
