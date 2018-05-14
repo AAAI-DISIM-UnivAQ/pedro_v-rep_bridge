@@ -216,22 +216,3 @@ def pedro_control():
             if percept != previous_percept:
                 previous_percept = percept
                 vrep_pedro.send_percept(percept)
-
-        # print("Trying Pedro connection ... ")
-        # try:
-        #     me = PedroClient(async=True)
-        #     print('OK')
-        # except Exception as e:
-        #     print('FAILED')
-        #     print(e)
-        #     exit()
-        # print("Trying Pedro registration ... ")
-        # if me.register('robot'):
-        #     print('OK')
-        # else:
-        #     print('FAILED')
-        #     exit()
-        # print('receiving actions..')
-        # while True:
-        #     msg = me.get_term()[0]
-        #     print(msg)
