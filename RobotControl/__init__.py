@@ -89,7 +89,7 @@ class MessageThread(threading.Thread):
 class Vrep_Pedro(object):
 
     # sensors:
-    # touching()
+    # sonar( Ld, Rd)
     #
 
     # motion:
