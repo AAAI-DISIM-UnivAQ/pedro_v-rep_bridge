@@ -37,7 +37,7 @@ __Percepts__:
 * Ld Left distance
 * Rd Right distance
 
-of type floating point, meters fro obstacles. Became very large to represent nothing (+ infinity)
+of type floating point, meters from obstacles. Became very large to represent nothing (+ infinity)
 
 
 __Actions__:
