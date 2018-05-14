@@ -3,6 +3,7 @@
 from pedroclient import *
 from redis import Redis
 
+PEDRO_IP = '127.0.0.1'
 PEDRO_AI = 'server'
 Red = Redis()
 
