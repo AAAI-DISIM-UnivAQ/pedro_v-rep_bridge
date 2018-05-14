@@ -5,16 +5,23 @@ Python robot controller that gets sensor data from V-REP simulator sending perce
 
 ## Requirements
 
-V-REP robot simulator, PEDRO server and REDIS server are needed: 
+V-REP robot simulator, PEDRO server are needed:
 -  http://www.coppeliarobotics.com/
 -  http://github.com/Troxid/vrep-api-python
 -  http://staff.itee.uq.edu.au/pjr/HomePages/PedroHome.html
--  http://redis.io
+-  http://redis.io  (optional)
 
 ## Nodes
 
+Configuration for redis_control:
+
     V_REP robot --> robot_interface (Python3) --> REDIS --> pedro_percepts -> PEDRO --> QuLog AI
     V_REP robot <-- robot_interface (Python3) <-- REDIS <-- pedro_actions <-- PEDRO <-- QuLog AI
+
+Configuration for pedro_control:
+
+    V_REP robot --> robot_interface (Python3) --> PEDRO --> QuLog AI
+    V_REP robot <-- robot_interface (Python3) <-- PEDRO <-- QuLog AI
 
 Like any V-REP project, you have to put the following files in the working directory, in order to run it:
 -  vrep.py
@@ -26,7 +33,7 @@ Check the [vrep-api-python](https://github.com/Troxid/vrep-api-python) for detai
 
 ## Robot control protocol
 
-The robot is controlled by the __ROBOT__ redis channel,  while it sends its sensor readings to the __ROBOT:PERCEPTS__ redis channel.
+In the _redis_control_ configuration, the robot is controlled by the __ROBOT__ redis channel,  while it sends its sensor readings to the __ROBOT:PERCEPTS__ redis channel.
 
 ### Protocol
 
@@ -42,9 +49,9 @@ of type floating point, meters from obstacles. Became very large to represent no
 
 __Actions__:
 
-    rotate_right(speed)
-    rotate_left(speed)
+    turn_right(speed)
+    turn_left(speed)
     move_forward(speed)
-    move_backward(speed)
+    stop()
 
 of type floating point, meters per seconds.
