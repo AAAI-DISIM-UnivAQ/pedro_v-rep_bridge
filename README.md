@@ -15,6 +15,12 @@ V-REP robot simulator, PEDRO server are needed:
 
 Configuration for redis_control:
 
+    V_REP robot --> robot_interface (Python3) --> REDIS --> your AI
+    V_REP robot <-- robot_interface (Python3) <-- REDIS <-- your AI
+
+
+Configuration for redis_control (+pedro):
+
     V_REP robot --> robot_interface (Python3) --> REDIS --> pedro_percepts -> PEDRO --> QuLog AI
     V_REP robot <-- robot_interface (Python3) <-- REDIS <-- pedro_actions <-- PEDRO <-- QuLog AI
 
