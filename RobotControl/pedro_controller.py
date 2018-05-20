@@ -36,7 +36,7 @@ class Vrep_Pedro(object):
         self.tr_client_addr = None
         self.client = PedroClient()
         # register vrep_pedro as the name of this process with Pedro
-        self.client.register("vrep_pedro")
+        self.client.register("robot_sim")
         self.queue = queue.Queue(0)
         self.message_thread = MessageThread(self.client, self.queue)
         self.message_thread.start()
@@ -71,6 +71,7 @@ class Vrep_Pedro(object):
 
     def process_initialize(self):
         # Block unitil message arrives
+        print('listening start signal..')
         p2pmsg = self.queue.get()
         print(p2pmsg)
         message = p2pmsg.args[2]
