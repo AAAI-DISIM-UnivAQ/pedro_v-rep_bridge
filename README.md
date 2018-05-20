@@ -45,9 +45,10 @@ In the _redis_control_ configuration, the robot is controlled by the __ROBOT__ r
 
 __Percepts__:
 
-    sonar( Ld, Rd)
+    sonar( Ld, Cd, Rd)
 
 * Ld Left distance
+* Cd Center distance
 * Rd Right distance
 
 of type floating point, meters from obstacles. Became very large to represent nothing (+ infinity)
@@ -58,6 +59,5 @@ __Actions__:
     turn_right(speed)
     turn_left(speed)
     move_forward(speed)
-    stop()
 
 of type floating point, meters per seconds.
