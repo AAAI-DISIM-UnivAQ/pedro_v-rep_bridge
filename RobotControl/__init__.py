@@ -126,7 +126,7 @@ class PedroControl(Control):
         return PioneerP3DX('Pioneer_p3dx', api)
 
     def process_percepts(self, percepts):
-        percept = '[sonar({0:.3f}, {1:0.3f} {2:0.3f})]'.format(percepts['left'],
+        percept = '[sonar({0:.3f}, {1:0.3f}, {2:0.3f})]'.format(percepts['left'],
                                                                percepts['center'],
                                                                percepts['right'])
         self.send_percept(percept)

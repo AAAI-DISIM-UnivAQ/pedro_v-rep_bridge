@@ -60,12 +60,14 @@ class PioneerP3DX(RobotModel):
         return {'left':self.left_distance(), 'center':self.center_distance(), 'right':self.right_distance()}
 
     def process_commands(self, commands):
+        print(commands)
         for cmd in commands:
             self.invoke(cmd['cmd'], cmd['args'])
 
     def invoke(self, cmd, args):
         print('invoke', cmd, args)
-        try:
-            getattr(self.__class__, cmd)(self, *args)
-        except AttributeError:
-            raise NotImplementedError("Class `{}` does not implement `{}`".format(self.__class__.__name__, cmd))
+        if cmd!= 'illegal_command':
+            try:
+                getattr(self.__class__, cmd)(self, *args)
+            except AttributeError:
+                raise NotImplementedError("Class `{}` does not implement `{}`".format(self.__class__.__name__, cmd))
