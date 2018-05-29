@@ -59,9 +59,9 @@ class DemoControl(Control):
         ll = self._ll
         cl = self._cl
         if rl > 0.01 and rl < 10:
-            return [{'cmd': 'turn_left', 'args': [2.0]}]
+            return [{'cmd': 'turn_left', 'args': [0.5]}]
         elif ll > 0.01 and ll < 10:
-            return [{'cmd': 'turn_right', 'args': [2.0]}]
+            return [{'cmd': 'turn_right', 'args': [0.5]}]
         else:
             speed = 10.0
             if cl<10:
@@ -147,7 +147,7 @@ class PedroControl(Control):
         if cmd_type == 'stop_':
             return {'cmd':'move_forward', 'args':[0.0]}
         else:
-            if cmd.functor.val == 'move':
+            if cmd.functor.val == 'move_forward':
                 speed = cmd.args[0].val
                 return {'cmd':'move_forward', 'args':[speed]}
             if cmd.functor.val == 'turn_left':
