@@ -65,8 +65,9 @@ class DemoControl(Control):
         else:
             speed = 10.0
             if cl<10:
+                speed = -1
+            else:
                 speed = 1
-            speed = speed * tanh(log(ll+1e-5) + log(rl+1e-5))
             if speed > 5.0:
                 speed = 5.0
             return [{'cmd': 'move_forward', 'args': [speed]}]
