@@ -7,7 +7,7 @@ Python robot controller that gets sensor data from V-REP simulator sending perce
 
 V-REP robot simulator, PEDRO server are needed:
 -  http://www.coppeliarobotics.com/
--  http://github.com/Troxid/vrep-api-python
+-  http://github.com/AAAI-DISIM-UnivAQ/vrep-api-python
 -  http://staff.itee.uq.edu.au/pjr/HomePages/PedroHome.html
 -  http://redis.io  (optional)
 
