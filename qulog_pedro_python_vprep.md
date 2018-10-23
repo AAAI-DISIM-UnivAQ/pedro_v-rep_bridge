@@ -13,8 +13,8 @@ Download this repo [http://github.com/AAAI-DISIM-UnivAQ/pedro_v-rep_bridge](http
 	2.1 copy pedroclient.py from the <pedro>/src/python_api
 	in your project
 	
-`    pedro -L stdout
-`
+`    pedro -L stdout`
+
 3. start the teleor/qulog controller
 
    from your project folder where you find the AI subfolder with
