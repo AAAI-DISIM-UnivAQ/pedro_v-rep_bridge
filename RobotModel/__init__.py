@@ -19,6 +19,7 @@ class PioneerP3DX(RobotModel):
         self._sensors['left'] = api.sensor.proximity(name+"_ultrasonicSensor2")
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
         self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor7")
+        # self._sensors['vision'] = api.sensor.vision(name+"_visionSensor")
 
     def turn_right(self, speed=2.0):
         print('turn_right', speed)
@@ -56,8 +57,51 @@ class PioneerP3DX(RobotModel):
         if dis > 9999: dis = 9999
         return dis
 
+    def get_vision(self, resolution, image, blob_data):
+        """
+        extract blob data from vision sensor image buffer
+
+        blob_data[0]=blob count
+        blob_data[1]=n=value count per blob
+        blob_data[2]=blob 1 size
+        blob_data[3]=blob 1 orientation
+        blob_data[4]=blob 1 position x
+        blob_data[5]=blob 1 position y
+        blob_data[6]=blob 1 width
+        blob_data[7]=blob 1 height
+        ...
+        :return: {COLOR, POSITION}, SIZE
+        """
+        color = ''
+        position = ''
+        if blob_data[0] == 0:
+            return color, position
+        blob_size = blob_data[2]
+        # get color
+        color = self.get_blob_color(resolution, image)
+        if color == "NONE":
+            return color, position, round(blob_size, 5)
+        if blob_size >= 0.65:
+            return color, "NEAR", round(blob_size, 5)
+        if 0.35 < blob_data[4] < 0.65:
+            return color, "CENTER", round(blob_size, 5)
+        if 0.0 < blob_data[4] < 0.35:
+            return color, "LEFT", round(blob_size, 5)
+        if 0.65 < blob_data[4] < 1:
+            return color, "RIGHT", round(blob_size, 5)
+        return color, position, round(blob_size, 5)
+
+    def vision(self):
+        result_vision, resolution, image = self._sensors['vision'].raw_image()
+        result_blob, t0, t1 = self._sensors['vision'].read()
+        out = self.get_vision(resolution, image, t1[0])
+        print('vision:', out)
+        return out
+
     def get_percepts(self):
-        return {'left':self.left_distance(), 'center':self.center_distance(), 'right':self.right_distance()}
+        # out = {'left':self.left_distance(), 'center':self.center_distance(), 'right':self.right_distance(), 'vision':self.vision()}
+        out = {'left': self.left_distance(), 'center': self.center_distance(), 'right': self.right_distance()}
+        return out
 
     def process_commands(self, commands):
         print(commands)

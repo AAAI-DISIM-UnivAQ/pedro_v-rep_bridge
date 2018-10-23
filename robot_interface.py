@@ -12,5 +12,5 @@ from RobotControl import demo_control, redis_control, pedro_control
 ## MAIN - Select your control function
 
 if __name__ == '__main__':
-    demo_control()
-    #pedro_control()
+    #demo_control()
+    pedro_control()
