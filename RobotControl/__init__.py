@@ -17,7 +17,11 @@ class Control(object):
         self._host = host
         self._port = port
         self._sleep_time = sleep_time
-        self._api = VRep.connect(self._host, self._port)
+        try:
+            self._api = VRep.connect(self._host, self._port)
+        except :
+            print('V-REP not responding')
+            exit(-1)
 
     def run(self):
         with self._api as api:
@@ -101,11 +105,11 @@ class PedroControl(Control):
         self.percepts_addr = p2pmsg.args[1]
 
     def set_client(self, addr):
-        self._tr_client_addr = addr
+        self.percepts_addr = addr
 
     def send_percept(self, percepts_string):
-        print("send_percept", str(self._tr_client_addr), percepts_string)
-        if self.client.p2p(self._tr_client_addr, percepts_string) == 0:
+        print("send_percept", str(self.percepts_addr), percepts_string)
+        if self.client.p2p(self.percepts_addr, percepts_string) == 0:
             print("Error", percepts_string)
 
     def process_initialize(self):
@@ -137,7 +141,7 @@ class PedroControl(Control):
         while not self.queue.empty():
             p2pmsg = self.queue.get()
             msg = p2pmsg.args[2]
-            actions = msg.args[0]
+            actions = msg
             for a in actions.toList():
                 cmds.append(self.action_to_command(a))
         return cmds
