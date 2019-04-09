@@ -96,7 +96,11 @@ class MessageThread(threading.Thread):
 class PedroControl(Control):
     def __init__(self, host='127.0.0.1', port=19997, sleep_time=1.0):
         super().__init__(host, port, sleep_time)
-        self.client = pedroclient.PedroClient()
+        try:
+            self.client = pedroclient.PedroClient()
+        except ConnectionRefusedError as e:
+            print('PEDRO server not responding', e)
+            exit(-1)
         self.client.register("vrep_pedro")
         self.queue = queue.Queue(0)
         self.message_thread = MessageThread(self.client, self.queue)
