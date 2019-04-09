@@ -1,5 +1,3 @@
-
-
 percept sonar( num, num, num )
 % sonar( L, C, R ) , Left, Center and Right sensor readings
 % I'm assuming all are floating numbers

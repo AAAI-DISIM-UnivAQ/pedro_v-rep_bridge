@@ -19,7 +19,7 @@ class PioneerP3DX(RobotModel):
         self._sensors['left'] = api.sensor.proximity(name+"_ultrasonicSensor2")
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
         self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor7")
-        # self._sensors['vision'] = api.sensor.vision(name+"_visionSensor")
+        self._sensors['vision'] = api.sensor.vision("Vision_sensor")
 
     def turn_right(self, speed=2.0):
         print('turn_right', speed)
@@ -74,8 +74,9 @@ class PioneerP3DX(RobotModel):
         """
         color = ''
         position = ''
+        size = 0
         if blob_data[0] == 0:
-            return color, position
+            return color, position, size
         blob_size = blob_data[2]
         # get color
         color = self.get_blob_color(resolution, image)
@@ -92,15 +93,21 @@ class PioneerP3DX(RobotModel):
         return color, position, round(blob_size, 5)
 
     def vision(self):
-        result_vision, resolution, image = self._sensors['vision'].raw_image()
-        result_blob, t0, t1 = self._sensors['vision'].read()
-        out = self.get_vision(resolution, image, t1[0])
+        resolution = [32, 32]
+        image = self._sensors['vision'].raw_image()
+        vision_result = self._sensors['vision'].read() # result_blob, t0, t1
+        color, position, size = self.get_vision(resolution, image, vision_result)
+        out = (color, position, size)
         print('vision:', out)
         return out
 
     def get_percepts(self):
-        # out = {'left':self.left_distance(), 'center':self.center_distance(), 'right':self.right_distance(), 'vision':self.vision()}
-        out = {'left': self.left_distance(), 'center': self.center_distance(), 'right': self.right_distance()}
+        out = {'left': self.left_distance(),
+               'center': self.center_distance(),
+               'right': self.right_distance(),
+               'vision': self.vision()
+               }
+        # out = {'left': self.left_distance(), 'center': self.center_distance(), 'right': self.right_distance()}
         return out
 
     def process_commands(self, commands):

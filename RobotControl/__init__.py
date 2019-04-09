@@ -135,9 +135,18 @@ class PedroControl(Control):
         return PioneerP3DX('Pioneer_p3dx', api)
 
     def process_percepts(self, percepts):
-        percept = '[sonar({0:.3f}, {1:0.3f}, {2:0.3f})]'.format(percepts['left'],
+        vision = percepts['vision']
+        percept = '['
+        percept += 'sonar({0:.3f}, {1:0.3f}, {2:0.3f})'.format(percepts['left'],
                                                                percepts['center'],
                                                                percepts['right'])
+        if vision != ('','',0):
+            # something has been seen
+            vision_pred = f'vision( {vision[0]}, {vision[1]}, {vision[2]} )'
+            percept += ', '
+            percept += vision_pred
+        percept += ']'
+
         self.send_percept(percept)
 
     def get_commands(self):

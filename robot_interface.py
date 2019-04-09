@@ -8,6 +8,8 @@
 
 from RobotControl import demo_control, redis_control, pedro_control
 
+# TODO: see robot collector example to handle proper simulation intialization
+#       file bottles_center_env.py , function process_msg, line 1074
 
 ## MAIN - Select your control function
 
