@@ -1,6 +1,7 @@
 
 from pyrep import VRep
 
+
 class RobotModel:
     def __init__(self, name: str, api: VRep):
         self._api = api
@@ -57,9 +58,10 @@ class PioneerP3DX(RobotModel):
         if dis > 9999: dis = 9999
         return dis
 
-    def get_vision(self, resolution, image, blob_data):
+    def get_vision(self, vision_result):
         """
         extract blob data from vision sensor image buffer
+            only sees red blobs
 
         blob_data[0]=blob count
         blob_data[1]=n=value count per blob
@@ -70,34 +72,36 @@ class PioneerP3DX(RobotModel):
         blob_data[6]=blob 1 width
         blob_data[7]=blob 1 height
         ...
-        :return: {COLOR, POSITION}, SIZE
+        :return: POSITION, SIZE
+            POSITION: close, center, left, right
+            SIZE: 0.0 .. 1.0
         """
-        color = ''
-        position = ''
-        size = 0
-        if blob_data[0] == 0:
-            return color, position, size
-        blob_size = blob_data[2]
-        # get color
-        color = self.get_blob_color(resolution, image)
-        if color == "NONE":
-            return color, position, round(blob_size, 5)
-        if blob_size >= 0.65:
-            return color, "NEAR", round(blob_size, 5)
-        if 0.35 < blob_data[4] < 0.65:
-            return color, "CENTER", round(blob_size, 5)
-        if 0.0 < blob_data[4] < 0.35:
-            return color, "LEFT", round(blob_size, 5)
-        if 0.65 < blob_data[4] < 1:
-            return color, "RIGHT", round(blob_size, 5)
-        return color, position, round(blob_size, 5)
+        if len(vision_result) > 1:
+            blob_data = vision_result[1]
+            position = ''
+            blob_size = 0
+            blob_count = int(blob_data[0])
+            if blob_count>0:
+                print('blobs: ', blob_count)
+                blob_size = blob_data[2]
+                if blob_size >= 0.65:
+                    return "close", round(blob_size, 5)
+                if 0.35 < blob_data[4] < 0.65:
+                    return "center", round(blob_size, 5)
+                if 0.0 < blob_data[4] < 0.35:
+                    return "left", round(blob_size, 5)
+                if 0.65 < blob_data[4] < 1:
+                    return "right", round(blob_size, 5)
+            return position, round(blob_size, 5)
+        else:
+            return '', 0
 
     def vision(self):
         resolution = [32, 32]
-        image = self._sensors['vision'].raw_image()
-        vision_result = self._sensors['vision'].read() # result_blob, t0, t1
-        color, position, size = self.get_vision(resolution, image, vision_result)
-        out = (color, position, size)
+        # raw_image = self._sensors['vision'].raw_image()
+        code, state, vision_result = self._sensors['vision'].read()
+        position, size = self.get_vision(vision_result)
+        out = (position, size)
         print('vision:', out)
         return out
 

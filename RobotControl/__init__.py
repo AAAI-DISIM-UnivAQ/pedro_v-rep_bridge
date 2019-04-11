@@ -140,9 +140,9 @@ class PedroControl(Control):
         percept += 'sonar({0:.3f}, {1:0.3f}, {2:0.3f})'.format(percepts['left'],
                                                                percepts['center'],
                                                                percepts['right'])
-        if vision != ('','',0):
+        if vision != ('',0):
             # something has been seen
-            vision_pred = f'vision( {vision[0]}, {vision[1]}, {vision[2]} )'
+            vision_pred = f'vision( {vision[0]}, {vision[1]})'
             percept += ', '
             percept += vision_pred
         percept += ']'
