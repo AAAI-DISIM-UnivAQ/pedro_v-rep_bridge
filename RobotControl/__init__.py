@@ -76,6 +76,7 @@ class DemoControl(Control):
                 speed = 5.0
             return [{'cmd': 'move_forward', 'args': [speed]}]
 
+
 # Handling messages from the TR program
 class MessageThread(threading.Thread):
     def __init__(self, client, q):
@@ -92,6 +93,7 @@ class MessageThread(threading.Thread):
 
     def stop(self):
         self.running = False
+
 
 class PedroControl(Control):
     def __init__(self, host='127.0.0.1', port=19997, sleep_time=1.0):
@@ -163,19 +165,19 @@ class PedroControl(Control):
         cmd_type = a.functor.val
         cmd = a.args[0]
         if cmd_type == 'stop_':
-            return {'cmd':'move_forward', 'args':[0.0]}
+            return {'cmd': 'move_forward', 'args': [0.0]}
         else:
             if cmd.functor.val == 'move_forward':
                 speed = cmd.args[0].val
-                return {'cmd':'move_forward', 'args':[speed]}
+                return {'cmd': 'move_forward', 'args': [speed]}
             if cmd.functor.val == 'turn_left':
                 speed = cmd.args[0].val
-                return {'cmd':'turn_left', 'args':[speed]}
+                return {'cmd': 'turn_left', 'args': [speed]}
             if cmd.functor.val == 'turn_right':
                 speed = cmd.args[0].val
-                return {'cmd':'turn_left', 'args':[speed]}
+                return {'cmd': 'turn_left', 'args': [speed]}
         # maybe raise an exception?
-        return {'cmd':'illegal_command', 'args':[str(a)]}
+        return {'cmd': 'illegal_command', 'args': [str(a)]}
 
 def redis_control():
     '''

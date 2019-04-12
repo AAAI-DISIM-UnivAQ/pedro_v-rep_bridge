@@ -1,14 +1,17 @@
-percept sonar( num, num, num )
+percept sonar( num, num, num ), vision( visval, num )
 % sonar( L, C, R ) , Left, Center and Right sensor readings
 % I'm assuming all are floating numbers
+% vision ( Position, Size) red bottle detection Position: close|center|left|right
 
 def durative ::=
     move_forward(num) | turn_right(num) | turn_left(num)
 def discrete ::= stop()
 % But stop() is not needed. Doing the empty action () will stop all of last
 % actions being executed
+def visval ::= close|center|left|right
 
 rel empty_space(), empty_left(), empty_right(), surrounded()
+rel bottle_seen(), bottle_center(), bottle_reached(), bottle_left(), bottle_right()
 % Multiple relation type decls in one statement
 
 empty_space() <=
@@ -23,9 +26,30 @@ empty_right() <=
 surrounded() <=
     not empty_space() & not empty_left() & not empty_right()
 
-tel wander()
+bottle_seen() <=
+    vision(_, _)
+
+bottle_center() <= vision(center, _)
+bottle_reached() <= vision(close, _)
+bottle_left() <= vision(left, _)
+bottle_right() <= vision(right, _)
+
+tel wander(), get_to_bottle()
+
+get_to_bottle() {
+
+    bottle_reached() ~> ()
+    bottle_left() ~> turn_left(0.01)
+    bottle_right() ~> turn_right(0.01)
+    bottle_center() ~> move_forward(1)
+    true  ~> wander()
+}
+
 wander() {
-    empty_space() ~> move_forward(1)
+
+    bottle_seen() ~> ()
+
+    empty_space()  ~> move_forward(1)
     % Just move forward when no obst in front
 
     empty_left() ~> turn_left(0.5)
@@ -38,7 +62,7 @@ wander() {
     % obstacles eveywhere, just go backwards and turn right
 
     true ~> [move_forward(-0.5):1, turn_left(1):1]
-    % bloked in front and to left and right, back and turn to find unblocked direction
+    % otherwise, back and turn to find unblocked direction
 }
 
 act go()
@@ -46,4 +70,5 @@ go() ~>
     start_agent( vrep_pedro, updates) ;
 % Name robot_wanderer is given to TeleoR process when launched with a command
 % teleor -Arobot_wanderer
-    start_task(wander_around, wander())
+    start_task(wander_around, get_to_bottle())
+
