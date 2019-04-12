@@ -67,7 +67,7 @@ wander() {
 
 act go()
 go() ~>
-    start_agent( vrep_pedro, updates) ;
+    start_agent( vrep_pedro, all ) ;
 % Name robot_wanderer is given to TeleoR process when launched with a command
 % teleor -Arobot_wanderer
     start_task(wander_around, get_to_bottle())
