@@ -17,6 +17,7 @@ class Control(object):
         self._host = host
         self._port = port
         self._sleep_time = sleep_time
+        self._last_percept_str = ''
         try:
             self._api = VRep.connect(self._host, self._port)
         except :
@@ -28,7 +29,8 @@ class Control(object):
             r = self.make_robot(api)
             while True:
                 r.process_commands(self.get_commands())
-                self.process_percepts(r.get_percepts())
+                perceptions = r.get_percepts()
+                self.process_percepts(perceptions)
                 time.sleep(self._sleep_time)
 
     def make_robot(self, api):
@@ -96,7 +98,7 @@ class MessageThread(threading.Thread):
 
 
 class PedroControl(Control):
-    def __init__(self, host='127.0.0.1', port=19997, sleep_time=1.0):
+    def __init__(self, host='127.0.0.1', port=19997, sleep_time=0.01):
         super().__init__(host, port, sleep_time)
         try:
             self.client = pedroclient.PedroClient()
@@ -142,14 +144,16 @@ class PedroControl(Control):
         percept += 'sonar({0:.3f}, {1:0.3f}, {2:0.3f})'.format(percepts['left'],
                                                                percepts['center'],
                                                                percepts['right'])
-        if vision != ('',0):
+        if vision != ('',0,0,0):
             # something has been seen
-            vision_pred = f'vision( {vision[0]}, {vision[1]})'
+            vision_pred = f'vision( {vision[0]}, {vision[1]}, {vision[2]}, {vision[3]})'
             percept += ', '
             percept += vision_pred
         percept += ']'
 
-        self.send_percept(percept)
+        if percept != self._last_percept_str:
+            self.send_percept(percept)
+            self._last_percept_str = percept
 
     def get_commands(self):
         cmds = []
@@ -157,8 +161,11 @@ class PedroControl(Control):
             p2pmsg = self.queue.get()
             msg = p2pmsg.args[2]
             actions = msg
-            for a in actions.toList():
-                cmds.append(self.action_to_command(a))
+            if isinstance(actions, pedroclient.PList):
+                for a in actions.toList():
+                    cmds.append(self.action_to_command(a))
+            else:
+                print(164, actions)
         return cmds
 
     def action_to_command(self, a):

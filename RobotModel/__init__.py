@@ -43,12 +43,12 @@ class PioneerP3DX(RobotModel):
 
     def right_distance(self):
         dis = self._sensors['right'].read()[1].distance()
-        if dis>9999: dis = 9999
+        if dis > 9999: dis = 9999
         return dis
 
     def left_distance(self):
         dis = self._sensors['left'].read()[1].distance()
-        if dis>9999: dis = 9999
+        if dis > 9999: dis = 9999
         return dis
 
     def center_distance(self):
@@ -76,33 +76,36 @@ class PioneerP3DX(RobotModel):
             POSITION: close, center, left, right
             SIZE: 0.0 .. 1.0
         """
+        SIZE_THR = 0.45
+
         if len(vision_result) > 1:
             blob_data = vision_result[1]
             position = ''
             blob_size = 0
+            blob_base = 0
+            blob_height = 0
             blob_count = int(blob_data[0])
             if blob_count>0:
-                print('blobs: ', blob_count)
-                blob_size = blob_data[2]
-                if blob_size >= 0.65:
-                    return "close", round(blob_size, 5)
+                # print('blobs: ', blob_count)
+                blob_size = blob_data[6]  # red blob width
+                blob_base = blob_data[5] - blob_data[7]/2.0
+                blob_height = blob_data[7]
+                if blob_size >= SIZE_THR:
+                    return "close", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
                 if 0.35 < blob_data[4] < 0.65:
-                    return "center", round(blob_size, 5)
+                    return "center", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
                 if 0.0 < blob_data[4] < 0.35:
-                    return "left", round(blob_size, 5)
+                    return "left", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
                 if 0.65 < blob_data[4] < 1:
-                    return "right", round(blob_size, 5)
-            return position, round(blob_size, 5)
+                    return "right", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
+            return position, round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
         else:
-            return '', 0
+            return '', 0, 0, 0
 
     def vision(self):
-        resolution = [32, 32]
-        # raw_image = self._sensors['vision'].raw_image()
         code, state, vision_result = self._sensors['vision'].read()
-        position, size = self.get_vision(vision_result)
-        out = (position, size)
-        print('vision:', out)
+        position, size, base, height = self.get_vision(vision_result)
+        out = (position, size, base, height)
         return out
 
     def get_percepts(self):
@@ -111,16 +114,15 @@ class PioneerP3DX(RobotModel):
                'right': self.right_distance(),
                'vision': self.vision()
                }
-        # out = {'left': self.left_distance(), 'center': self.center_distance(), 'right': self.right_distance()}
         return out
 
     def process_commands(self, commands):
-        print(commands)
+        # print(commands)
         for cmd in commands:
             self.invoke(cmd['cmd'], cmd['args'])
 
     def invoke(self, cmd, args):
-        print('invoke', cmd, args)
+        # print('invoke', cmd, args)
         if cmd!= 'illegal_command':
             try:
                 getattr(self.__class__, cmd)(self, *args)

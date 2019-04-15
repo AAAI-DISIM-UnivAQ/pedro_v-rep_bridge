@@ -1,67 +1,76 @@
-percept sonar( num, num, num ), vision( visval, num )
 % sonar( L, C, R ) , Left, Center and Right sensor readings
-% I'm assuming all are floating numbers
-% vision ( Position, Size) red bottle detection Position: close|center|left|right
+% assuming all are floating numbers
+% vision ( Position, Width, Base, Height ) red bottle detection
+% Position: close|center|left|right
+% Width, Base, Height : floating numbers
 
 def durative ::=
     move_forward(num) | turn_right(num) | turn_left(num)
 def discrete ::= stop()
 % But stop() is not needed. Doing the empty action () will stop all of last
 % actions being executed
-def visval ::= close|center|left|right
+def visval ::= close|center|left|right|reached|onright|onleft|space|seen
 
-rel empty_space(), empty_left(), empty_right(), surrounded()
-rel bottle_seen(), bottle_center(), bottle_reached(), bottle_left(), bottle_right()
-% Multiple relation type decls in one statement
+percept sonar( num, num, num ), vision( visval, num, num, num)
 
-empty_space() <=
+rel empty(visval), surrounded(num, num, num), stuck(num, num, num)
+rel bottle(visval)
+% Multiple relation type decls in sonarrayone statement
+
+empty(space) <=
     sonar(_, C, _) & C>1000
 
-empty_left() <=
+empty(onleft) <=
     sonar(L, _, R) & L>1000 & R<10
 
-empty_right() <=
+empty(onright) <=
     sonar(L, _, R) & L<10 & R>1000
 
-surrounded() <=
-    not empty_space() & not empty_left() & not empty_right()
+surrounded(1,1,1) <=
+    not empty(space) & not empty(left) & not empty(right)
 
-bottle_seen() <=
-    vision(_, _)
+surrounded(L, C, R) <=
+    sonar(L, C, R) & L<1 & C<1 & R<1
 
-bottle_center() <= vision(center, _)
-bottle_reached() <= vision(close, _)
-bottle_left() <= vision(left, _)
-bottle_right() <= vision(right, _)
+bottle(seen) <=
+    vision(_, Width, _, Height) & Height/Width > 1.5
+
+bottle(reached) <= vision(close, W, B, _) & B < 0.02 & W > 0.45
+bottle(center)  <= vision(center, W, _, _) & W > 0.03
+bottle(left)    <= vision(left, W, _, _) & W > 0.03
+bottle(right)   <= vision(right, W, _, _) & W > 0.03
+
+stuck(L, C, R)          <= surrounded(L, C, R) & vision(_, _, _, _)
 
 tel wander(), get_to_bottle()
 
 get_to_bottle() {
 
-    bottle_reached() ~> ()
-    bottle_left() ~> turn_left(0.01)
-    bottle_right() ~> turn_right(0.01)
-    bottle_center() ~> move_forward(1)
+    bottle(reached) while min_time 2 ~> [move_forward(-1):1, turn_left(2)]
+    stuck(1, 1, 1) ~> wander()
+    bottle(left) ~> turn_left(0.01)
+    bottle(right) ~> turn_right(0.01)
+    bottle(center) while min_time 1 ~>  move_forward(1)
     true  ~> wander()
 }
 
 wander() {
 
-    bottle_seen() ~> ()
+    bottle(seen) ~> ()
 
-    empty_space()  ~> move_forward(1)
+    empty(space)  ~> move_forward(1)
     % Just move forward when no obst in front
 
-    empty_left() ~> turn_left(0.5)
+    empty(left) while min_time 1 ~> turn_left(0.5)
     % obst in front but none to the left, turn left so none in front
 
-    empty_right() ~> turn_right(0.5)
+    empty(right) while min_time 1 ~> turn_right(0.5)
     % obst in front but none to the right, turn right so none in front
 
-    surrounded() ~> [move_forward(-1):1, turn_right(1):1]
-    % obstacles eveywhere, just go backwards and turn right
+    surrounded(1,1,1) while min_time 2 ~>  [move_forward(-1):1, turn_right(1):1]
+    % obstacles everywhere, just go backwards and turn right
 
-    true ~> [move_forward(-0.5):1, turn_left(1):1]
+    true while min_time 2 ~> [move_forward(-0.5):1, turn_left(1):1]
     % otherwise, back and turn to find unblocked direction
 }
 
