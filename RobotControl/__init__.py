@@ -177,12 +177,15 @@ class PedroControl(Control):
             if cmd.functor.val == 'move_forward':
                 speed = cmd.args[0].val
                 return {'cmd': 'move_forward', 'args': [speed]}
-            if cmd.functor.val == 'turn_left':
+            elif cmd.functor.val == 'turn_left':
                 speed = cmd.args[0].val
                 return {'cmd': 'turn_left', 'args': [speed]}
-            if cmd.functor.val == 'turn_right':
+            elif cmd.functor.val == 'turn_right':
                 speed = cmd.args[0].val
                 return {'cmd': 'turn_left', 'args': [speed]}
+            elif cmd.functor.val == 'task':
+                task_num = cmd.args[0].val
+                return {'cmd': 'task', 'args': [task_num]}
         # maybe raise an exception?
         return {'cmd': 'illegal_command', 'args': [str(a)]}
 
