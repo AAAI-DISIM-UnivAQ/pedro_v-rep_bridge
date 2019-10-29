@@ -46,14 +46,16 @@ In the _redis_control_ configuration, the robot is controlled by the __ROBOT__ r
 __Percepts__:
 
     sonar( Ld, Cd, Rd)
-
-* Ld Left distance
-* Cd Center distance
-* Rd Right distance
+    Ld Left distance
+    Cd Center distance
+    Rd Right distance
 
 of type floating point, meters from obstacles. Became very large to represent nothing (+ infinity)
 
-
+    vision ( Position, Width, Base, Height ) red bottle detection
+    Position: close|center|left|right
+    Width, Base, Height : floats  
+    
 __Actions__:
 
     turn_right(speed)
