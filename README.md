@@ -5,10 +5,11 @@ Python robot controller that gets sensor data from V-REP simulator sending perce
 
 ## Requirements
 
-V-REP robot simulator, PEDRO server are needed:
+V-REP robot simulator, PEDRO server and QuLog/Teleor clients are needed:
 -  http://www.coppeliarobotics.com/
 -  http://github.com/AAAI-DISIM-UnivAQ/vrep-api-python
 -  http://staff.itee.uq.edu.au/pjr/HomePages/PedroHome.html
+-  http://staff.itee.uq.edu.au/pjr/HomePages/QulogHome.html
 -  http://redis.io  (optional)
 
 ## Nodes
