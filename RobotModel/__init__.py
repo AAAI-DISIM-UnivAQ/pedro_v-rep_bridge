@@ -1,5 +1,5 @@
 
-from pyrep import VRep
+from pyvrep import VRep
 
 
 class RobotModel:
