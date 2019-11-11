@@ -58,8 +58,8 @@ class PioneerP3DX(RobotModel):
         if dis > 9999: dis = 9999
         return dis
 
-    def task(self, code):
-        print(f'task:{code}')
+    def display(self, code):
+        print(f'display:{code}')
 
     def get_vision(self, vision_result):
         """

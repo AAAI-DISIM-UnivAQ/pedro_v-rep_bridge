@@ -7,7 +7,7 @@
 from RobotModel import PioneerP3DX, VRep
 import time
 from math import tanh, log
-from redis import Redis
+# from redis import Redis
 import pedroclient
 import queue
 import threading
@@ -183,9 +183,9 @@ class PedroControl(Control):
             elif cmd.functor.val == 'turn_right':
                 speed = cmd.args[0].val
                 return {'cmd': 'turn_left', 'args': [speed]}
-            elif cmd.functor.val == 'task':
+            elif cmd.functor.val == 'display':
                 task_num = cmd.args[0].val
-                return {'cmd': 'task', 'args': [task_num]}
+                return {'cmd': 'display', 'args': [task_num]}
         # maybe raise an exception?
         return {'cmd': 'illegal_command', 'args': [str(a)]}
 
