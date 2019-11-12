@@ -59,7 +59,7 @@ class PioneerP3DX(RobotModel):
         return dis
 
     def display(self, code):
-        res = self._api.simxCallScriptFunction(0, 'debug', self._api.sim_scripttype_mainscript,
+        # res = self._api.simxCallScriptFunction(0, 'debug', self._api.sim_scripttype_mainscript,
                                                   'show_debug', code, self._api.simx_opmode_blocking)
         print(f'display:{code} {res}')
 
