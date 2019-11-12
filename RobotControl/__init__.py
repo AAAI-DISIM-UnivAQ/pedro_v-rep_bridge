@@ -6,11 +6,11 @@
 
 from RobotModel import PioneerP3DX, VRep
 import time
-from math import tanh, log
 # from redis import Redis
 import pedroclient
 import queue
 import threading
+
 
 class Control(object):
     def __init__(self, host, port, sleep_time):
@@ -64,9 +64,9 @@ class DemoControl(Control):
         rl = self._rl
         ll = self._ll
         cl = self._cl
-        if rl > 0.01 and rl < 10:
+        if 0.01 < rl < 10:
             return [{'cmd': 'turn_left', 'args': [0.5]}]
-        elif ll > 0.01 and ll < 10:
+        elif 0.01 < ll < 10:
             return [{'cmd': 'turn_right', 'args': [0.5]}]
         else:
             speed = 10.0
@@ -188,6 +188,7 @@ class PedroControl(Control):
                 return {'cmd': 'display', 'args': [task_num]}
         # maybe raise an exception?
         return {'cmd': 'illegal_command', 'args': [str(a)]}
+
 
 def redis_control():
     '''
