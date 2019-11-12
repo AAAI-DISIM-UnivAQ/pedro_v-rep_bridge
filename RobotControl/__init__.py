@@ -18,6 +18,7 @@ class Control(object):
         self._port = port
         self._sleep_time = sleep_time
         self._last_percept_str = ''
+        self._stop = False
         try:
             self._api = VRep.connect(self._host, self._port)
         except :
@@ -32,6 +33,9 @@ class Control(object):
                 perceptions = r.get_percepts()
                 self.process_percepts(perceptions)
                 time.sleep(self._sleep_time)
+                if self._stop:
+                    key = input('Press RETURN')
+                    self._stop = False
 
     def make_robot(self, api):
         return None
@@ -164,11 +168,14 @@ class PedroControl(Control):
             if isinstance(actions, pedroclient.PList):
                 for a in actions.toList():
                     cmds.append(self.action_to_command(a))
+            if 'stopped' in str(msg):
+                self._stop = True
             else:
                 print(164, actions)
         return cmds
 
     def action_to_command(self, a):
+        print(181, str(a))
         cmd_type = a.functor.val
         cmd = a.args[0]
         if cmd_type == 'stop_':

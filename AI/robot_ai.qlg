@@ -18,13 +18,13 @@ rel bottle(visval)
 % Multiple relation type decls in sonarrayone statement
 
 empty(space) <=
-    sonar(L, C, R) & L>0.2 & R>0.2 & C>100
+    sonar(L, C, R) & L>0.2 & R>0.2 & C>2
 
 empty(onleft) <=
-    sonar(L, _, R) & L>100 & R<10
+    sonar(L, _, _) & L>2 
 
 empty(onright) <=
-    sonar(L, _, R) & L<10 & R>100
+    sonar(_, _, R) &  R>2
 
 surrounded() <=
     sonar(L, C, R) & L<0.1 & C<0.1 & R<0.1
@@ -48,6 +48,14 @@ stuck()          <= surrounded() & vision(_, _, _, _)
 
 tel wander(), get_to_bottle(), followall()
 
+get_to_bottle() {
+     bottle(reached) ~> ()++ bottle_found to vrep_pedro 
+     empty(space) & bottle(center) ~>  move_forward(1)
+     bottle(left) &  not bottle(dead_center) ~> turn_left(0.05)
+     bottle(right) &  not bottle(dead_center) ~> turn_right(0.05)
+     true  ~> [display(3):0, wander()]
+}
+
 followall() {
     surrounded() & dir(onleft) ~> turn_left(0.2)
     surrounded() & dir(onright) ~> turn_right(0.2)
@@ -55,13 +63,6 @@ followall() {
     true ~> [display(2):0, wander()]
 }
 
-get_to_bottle() {
-     bottle(reached) while min_time 2 ~> [move_forward(-0.5):1, turn_left(0.5)]
-     bottle(center) ~>  move_forward(1)
-     bottle(left) &  not bottle(dead_center) ~> turn_left(0.05)
-     bottle(right) &  not bottle(dead_center) ~> turn_right(0.05)
-     true  ~> [display(3):0, wander()]
-}
 
 wander() {
     empty(space)  ~> move_forward(1)
@@ -73,10 +74,10 @@ wander() {
     empty(onright) ~> turn_right(0.5)
     % obst in front but none to the right, turn right so none in front
 
-    surrounded() while min_time 2 ~>  [move_forward(-0.5):1, turn_right(0.5):1]
+    % surrounded() while min_time 2 ~>  [move_forward(-0.5):1, turn_right(0.5):1]
     % obstacles everywhere, just go backwards and turn right
 
-    true while min_time 2 ~> [display(4):0, move_forward(-0.5):1, turn_left(0.5):1]
+    true inhibit min_time 2 ~> [display(4):0, move_forward(-0.5):1, turn_left(0.5):1]
     % otherwise, back and turn to find unblocked direction
 }
 
@@ -85,5 +86,5 @@ go() ~>
     start_agent( vrep_pedro, all ) ;
 % Name robot_wanderer is given to TeleoR process when launched with a command
 % teleor -Arobot_wanderer
-    start_task(wander_around, followall())
+    start_task(wander_around, get_to_bottle())
 

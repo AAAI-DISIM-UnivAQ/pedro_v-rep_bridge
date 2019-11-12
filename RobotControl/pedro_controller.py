@@ -1,5 +1,6 @@
 
 from pedroclient import *
+import time
 
 # Handling messages from the TR program
 class MessageThread(threading.Thread):
