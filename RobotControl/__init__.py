@@ -21,6 +21,11 @@ class Control(object):
         self._stop = False
         try:
             self._api = VRep.connect(self._host, self._port)
+            # number returnCode=simxSetIntegerSignal(number clientID,string signalName,number signalValue,number operationMode)
+            # self._api.simxSetIntegerSignal(0, 'stop_loop', 0, 0)
+        except AttributeError as e:
+            print(27, e)
+            exit(-1)
         except :
             print('V-REP not responding')
             exit(-1)
@@ -33,9 +38,14 @@ class Control(object):
                 perceptions = r.get_percepts()
                 self.process_percepts(perceptions)
                 time.sleep(self._sleep_time)
-                if self._stop:
+                # print(f'sim state: {api.simxGetSimulationState("")}')
+                simStop = False
+                if self._stop or simStop:
+                    api.simulation.pause()
                     key = input('Press RETURN')
                     self._stop = False
+                    api.simulation.start()
+
 
     def make_robot(self, api):
         return None

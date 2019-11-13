@@ -15,11 +15,12 @@ class PioneerP3DX(RobotModel):
         RobotModel.__init__(self, name, api)
         self._actuators = {}
         self._sensors = {}
+        # self._signals = {}
         self._actuators['left'] = api.joint.with_velocity_control(name+"_leftMotor")
         self._actuators['right'] = api.joint.with_velocity_control(name+"_rightMotor")
-        self._sensors['left'] = api.sensor.proximity(name+"_ultrasonicSensor2")
+        self._sensors['left'] = api.sensor.proximity(name+"_ultrasonicSensor3")
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
-        self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor7")
+        self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor6")
         self._sensors['vision'] = api.sensor.vision("Vision_sensor")
 
     def turn_right(self, speed=2.0):
@@ -52,9 +53,9 @@ class PioneerP3DX(RobotModel):
         return dis
 
     def center_distance(self):
-        dis = self._sensors['center'][0].read()[1].distance()
-        dis += self._sensors['center'][1].read()[1].distance()
-        dis /= 2
+        a = self._sensors['center'][0].read()[1].distance()
+        b = self._sensors['center'][1].read()[1].distance()
+        dis = min(a,b)
         if dis > 9999: dis = 9999
         return dis
 
@@ -120,6 +121,10 @@ class PioneerP3DX(RobotModel):
                'vision': self.vision()
                }
         return out
+
+    def get_signal(self, name):
+        returnCode, signalValue = self._api.simxGetIntegerSignal(0, name, 0)
+        return signalValue
 
     def process_commands(self, commands):
         # print(commands)
