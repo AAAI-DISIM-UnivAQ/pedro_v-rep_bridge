@@ -178,7 +178,7 @@ class PedroControl(Control):
             if isinstance(actions, pedroclient.PList):
                 for a in actions.toList():
                     cmds.append(self.action_to_command(a))
-            if 'stopped' in str(msg):
+            if 'stopped' in str(msg) or 'bottle_found' in str(msg):
                 self._stop = True
             else:
                 print(164, actions)

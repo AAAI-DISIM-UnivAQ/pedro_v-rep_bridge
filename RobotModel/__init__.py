@@ -84,7 +84,7 @@ class PioneerP3DX(RobotModel):
             POSITION: close, center, left, right
             SIZE: 0.0 .. 1.0
         """
-        SIZE_THR = 0.45
+        SIZE_THR = 0.3
 
         if len(vision_result) > 1:
             blob_data = vision_result[1]
@@ -98,6 +98,7 @@ class PioneerP3DX(RobotModel):
                 blob_size = blob_data[6]  # red blob width
                 blob_base = blob_data[5] - blob_data[7]/2.0
                 blob_height = blob_data[7]
+                print(f'blob_size:{blob_size}')
                 if blob_size >= SIZE_THR:
                     return "close", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
                 if 0.35 < blob_data[4] < 0.65:

@@ -38,7 +38,7 @@ dir(onleft)  <=
 
 rel bottle(visval)
 bottle(seen) <= vision(_, Width, _, Height) & Height/Width > 1.5
-bottle(reached) <= vision(close, W, B, _) & B < 0.02 & W > 0.45
+bottle(reached) <= vision(close, W, B, _) & B < 0.02 & W > 0.3
 bottle(center)  <= vision(center, W, _, _) & W > 0.03
 bottle(dead_center) <= vision(center, W, _, _) & W > 0.0 & W < 0.03
 bottle(left)    <= vision(left, W, _, _) & W >= 0.03
@@ -59,8 +59,8 @@ get_to_bottle() {
      bottle(reached) ~> ()++ bottle_found to vrep_pedro 
      bottle_in(dead_center) ~>  move_forward(1)
      bottle_in(center) ~>  move_forward(1)
-     bottle_in(left) ~> turn_left(0.05)
-     bottle_in(right) ~> turn_right(0.05)
+     bottle_in(left) min_time 0.5 ~> turn_left(0.2)
+     bottle_in(right) min_time 0.5 ~> turn_right(0.2)
      true  ~> [display(3):0, wander()]
 }
 
@@ -76,10 +76,10 @@ wander() {
     empty(space)  ~> move_forward(2)
     % Just move forward when no obst in front
 
-    empty(onright) ~> turn_right(0.5)
+    empty(onright) min_time 0.5 ~> turn_right(0.5)
     % obst in front but none to the right, turn right so none in front
 
-    empty(onleft) ~> turn_left(0.5)
+    empty(onleft) min_time 0.5 ~> turn_left(0.5)
     % obst in front but none to the left, turn left so none in front
 
     surrounded() while min_time 2 ~>  [move_forward(-0.5):1, turn_right(0.5):1]
