@@ -56,6 +56,8 @@ class PioneerP3DX(RobotModel):
         a = self._sensors['center'][0].read()[1].distance()
         b = self._sensors['center'][1].read()[1].distance()
         dis = min(a,b)
+        if dis == 0.0:
+            dis = max(a,b)
         if dis > 9999: dis = 9999
         return dis
 

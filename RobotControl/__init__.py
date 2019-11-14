@@ -199,7 +199,7 @@ class PedroControl(Control):
                 return {'cmd': 'turn_left', 'args': [speed]}
             elif cmd.functor.val == 'turn_right':
                 speed = cmd.args[0].val
-                return {'cmd': 'turn_left', 'args': [speed]}
+                return {'cmd': 'turn_right', 'args': [speed]}
             elif cmd.functor.val == 'display':
                 task_num = cmd.args[0].val
                 return {'cmd': 'display', 'args': [task_num]}
