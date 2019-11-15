@@ -123,6 +123,7 @@ class PioneerP3DX(RobotModel):
                'right': self.right_distance(),
                'vision': self.vision()
                }
+        print('percepts', out)
         return out
 
     def get_signal(self, name):

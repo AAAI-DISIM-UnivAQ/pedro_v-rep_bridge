@@ -107,7 +107,6 @@ class KeyboardControl(Control):
         self._ll = percepts['left']
         self._rl = percepts['right']
         self._cl = percepts['center']
-        print(f'percetps: {self._ll, self._cl, self._rl}')
 
     def get_commands(self):
         self._api.simulation.pause()
