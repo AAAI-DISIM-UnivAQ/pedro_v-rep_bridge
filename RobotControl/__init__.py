@@ -110,7 +110,9 @@ class KeyboardControl(Control):
         print(f'percetps: {self._ll, self._cl, self._rl}')
 
     def get_commands(self):
+        self._api.simulation.pause()
         command = input('WSAD? ')
+        self._api.simulation.start()
         if len(command)==0:
             return []
         if command[0] .lower() == 'w':
@@ -118,7 +120,7 @@ class KeyboardControl(Control):
         elif command[0] .lower() == 'd':
             return [{'cmd': 'turn_right', 'args': [0.2]}]
         elif command[0].lower() == 'a':
-            return [{'cmd': 'turn_right', 'args': [0.2]}]
+            return [{'cmd': 'turn_left', 'args': [0.2]}]
         elif command[0].lower() == 's':
             return [{'cmd': 'move_forward', 'args': [-0.5]}]
 
