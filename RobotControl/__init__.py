@@ -93,6 +93,34 @@ class DemoControl(Control):
             return [{'cmd': 'move_forward', 'args': [speed]}]
 
 
+class KeyboardControl(Control):
+    def __init__(self, host='127.0.0.1', port=19997, sleep_time=0.01):
+        super().__init__(host, port, sleep_time)
+        self._rl = 0 # right sensor reading
+        self._ll = 0 # left
+        self._cl = 0 # center
+
+    def make_robot(self, api):
+        return PioneerP3DX('Pioneer_p3dx', api)
+
+    def process_percepts(self, percepts):
+        self._ll = percepts['left']
+        self._rl = percepts['right']
+        self._cl = percepts['center']
+        print(f'percetps: {self._ll, self._cl, self._rl}')
+
+    def get_commands(self):
+        command = input('WSAD? ')
+        if command[0] .lower() == 'w':
+            return [{'cmd': 'move_forward', 'args': [0.5]}]
+        elif command[0] .lower() == 'd':
+            return [{'cmd': 'turn_right', 'args': [0.2]}]
+        elif command[0].lower() == 'a':
+            return [{'cmd': 'turn_right', 'args': [0.2]}]
+        elif command[0].lower() == 's':
+            return [{'cmd': 'move_forward', 'args': [-0.5]}]
+
+
 # Handling messages from the TR program
 class MessageThread(threading.Thread):
     def __init__(self, client, q):
