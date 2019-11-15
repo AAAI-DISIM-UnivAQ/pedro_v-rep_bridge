@@ -6,7 +6,7 @@
     Class to control a PioneerP3DX inside a V-REP robot simulator
 '''
 
-from RobotControl import demo_control, redis_control, pedro_control
+from RobotControl import demo_control, keyboard_control, redis_control, pedro_control
 
 # TODO: see robot collector example to handle proper simulation intialization
 #       file bottles_center_env.py , function process_msg, line 1074
@@ -15,4 +15,5 @@ from RobotControl import demo_control, redis_control, pedro_control
 
 if __name__ == '__main__':
     #demo_control()
-    pedro_control()
+    keyboard_control()
+    #pedro_control()

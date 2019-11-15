@@ -111,6 +111,8 @@ class KeyboardControl(Control):
 
     def get_commands(self):
         command = input('WSAD? ')
+        if len(command)==0:
+            return []
         if command[0] .lower() == 'w':
             return [{'cmd': 'move_forward', 'args': [0.5]}]
         elif command[0] .lower() == 'd':
@@ -272,16 +274,30 @@ def demo_control():
     :return:
     '''
 
+    print('demo controller active')
     vrep_demo = DemoControl()
     vrep_demo.process_initialize()  # not needed in this case
     vrep_demo.run()
 
+
+def keyboard_control():
+    '''
+        In process robot control. Navigate tthe robot from keyboard with WSAD keys.
+    :return:
+    '''
+
+    print('keyboard controller active')
+    vrep_demo = KeyboardControl()
+    vrep_demo.process_initialize()  # not needed in this case
+    vrep_demo.run()
 
 def pedro_control():
     '''
         Out of process robot control by a teleor AI
     :return:
     '''
+
+    print('pedro/teleor controller active')
     vrep_pedro = PedroControl()
     # wait for and process initialize_ message
     vrep_pedro.process_initialize()
