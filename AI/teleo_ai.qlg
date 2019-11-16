@@ -11,7 +11,7 @@
 def durative ::=
     move_forward(num) | turn_right(num) | turn_left(num) | display(num)
 
-def visdir ::= left|right|center
+def visdir ::= close|left|right|center
 
 def distance ::= dist0 | dist1 | dist2 | dist3 | dist4 | dist5 | dist6
 
@@ -68,8 +68,8 @@ get_to_bottle() {
 approach_bottle() {
     vision(_, dist0) ~> ()++ bottle_found to vrep_pedro 
     vision(center, _) ~>  move_forward(1)
-    vision(left, _) min_time 0.5 ~> turn_left(0.2)
-    vision(right, _) min_time 0.5 ~> turn_right(0.2)
+    vision(left, _) min_time 0.2 ~> turn_left(0.2)
+    vision(right, _) min_time 0.2 ~> turn_right(0.2)
     }
 
 wander() {
