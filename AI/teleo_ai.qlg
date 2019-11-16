@@ -40,35 +40,43 @@ larger_dist(dist6, dist3)
 larger_dist(dist6, dist4)
 larger_dist(dist6, dist5)
 
-rel front_free()
-front_free() <=
-    sonar(L, dist6, R) &
-    larger_dist(L, dist1) &
-    larger_dist(R, dist1)
-rel left_free()
-left_free() <=
-    sonar(L, _, R) &
-    larger_dist(L, dist4) &
-    larger_dist(L, R)
-rel right_free()
-right_free() <=
-    sonar(L, _, R) &
-    larger_dist(R, dist4) &
-    larger_dist(R, L)
+% rel front_free()
+% front_free() <=
+%     sonar(L, dist6, R) &
+%     larger_dist(L, dist1) &
+%     larger_dist(R, dist1)
+
+% rel left_free()
+% left_free() <=
+%     sonar(L, _, R) &
+%     larger_dist(L, dist4) &
+%     larger_dist(L, R)
+
+% rel right_free()
+% right_free() <=
+%     sonar(L, _, R) &
+%     larger_dist(R, dist4) &
+%     larger_dist(R, L)
 
 rel close_wall_left(), close_wall_right(),  cornered()
 
+%% wall at distance dist0, dist1, dist2, dist3
 close_wall_left() <=
     sonar(R, _, _) & larger_dist(dist4, R)
 close_wall_right() <=
     sonar(_, _, R) & larger_dist(dist4, R)
 
+%% same as close_wall_left() & close_wall_right()
 cornered() <=
     sonar(L, _, R) &
     larger_dist(dist4, L) &
     larger_dist(dist4, R)
 
 rel can_approach_bottle(visdir, distance)
+
+%% The robot can approach the bottle if the bottle is close
+%% or the bottle is in the center or if the sonar does not detect anything
+%% closer in the center direction.
 
 can_approach_bottle(close, _)
 can_approach_bottle(center, _)
@@ -83,35 +91,58 @@ can_approach_bottle(_, Dist) <=
 tel wander(), get_to_bottle(), approach_bottle()
 
 get_to_bottle() {
+    %% the bottle is seen and can be approached without hitting a wall
     vision(Dir, Dist) & can_approach_bottle(Dir, Dist) ~> approach_bottle()
+    
+    %% also perhaps a rule like
+    %% vision(_, _) ~> avoiding_approach()
+    
+    %% if the above rule is added then this rule would be for searching 
+    %% for a bottle
     true  ~> wander()
 }
 
-%% precondition: vision(_, _) is true
+%% precondition: vision(_, _) is true and bottle can be approached
 approach_bottle() {
+    %% next to bottle - finished
     vision(_, dist0) ~> ()++ bottle_found to vrep_pedro 
+    
+    %% turn away from left wall
     close_wall_left() min_time 0.4 ~> turn_right(0.2)
+    
+    %% turn away from right wall
     close_wall_right() min_time 0.4 ~> turn_left(0.2)
+    
+    %%move towards bottle in center
     vision(center, _) ~>  move_forward(1)
-    vision(left, _)   min_time 0.4 ~> turn_left(0.2)
-    vision(right, _) min_time 0.4 ~> turn_right(0.2)
+    
+    %% turn towards bottle
+    vision(left, _)  min_time 0.7 ~> turn_left(0.2)
+    vision(right, _) min_time 0.7 ~> turn_right(0.2)
     }
 
 wander() {
+    %% to escape a corner it would be good to turn 180 and move away
+    %% to do this we ned the turn right speed/time to be callibrated 
+    %% so that turning at this speed to the given time will produce
+    %% about a 180 turn
     cornered() min_time 3 ~> [turn_right(0.4):2, move_forward(0.2)]
 
+    %% move away fom wall
     close_wall_left() min_time 0.5 ~> turn_right(0.2)
 
     close_wall_right() min_time 0.5 ~> turn_left(0.2)
     
+    %% we are not cornered or close to a wall on the left or right
+    %% but there is a close wall in front - e.g a doorway
     sonar(_, C, _) &  larger_dist(dist4, C) min_time 3 ~> 
             [move_forward(-0.3):1, turn_right(0.3):1, move_forward(0.3)]
        
-    sonar(L, _, R) & larger_dist(L, R) & larger_dist(dist2, L) min_time 0.5 ~> 
-            turn_left(0.2)
+    % sonar(L, _, R) & larger_dist(L, R)  min_time 0.5 ~> 
+    %         turn_left(0.2)
     
-    sonar(L, _, R) & larger_dist(R, L) & larger_dist(dist2, R) min_time 0.5 ~>
-            turn_right(0.2)
+    % sonar(L, _, R) & larger_dist(R, L)  min_time 0.5 ~>
+    %         turn_right(0.2)
     
     true ~> move_forward(1)
     

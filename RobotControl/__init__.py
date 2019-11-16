@@ -368,7 +368,7 @@ def teleo_control():
     '''
 
     print('teleor controller active')
-    vrep_teleo = TeleoControl()
+    vrep_teleo = TeleoControl(sleep_time=0.1)
     # wait for and process initialize_ message
     vrep_teleo.process_initialize()
     vrep_teleo.run()
