@@ -237,6 +237,61 @@ class PedroControl(Control):
         # maybe raise an exception?
         return {'cmd': 'illegal_command', 'args': [str(a)]}
 
+class TeleoControl(PedroControl):    
+    def __init__(self, host='127.0.0.1', port=19997, sleep_time=0.01):
+        super().__init__(host, port, sleep_time)
+
+    def vision2dist(self, width) :
+        if width < 0.0625:
+            return "dist5"
+        elif width < 0.09375:
+            return "dist4"
+        elif width < 0.0125:
+            return "dist3"
+        elif width < 0.01875:
+            return "dist2"
+        elif width < 0.025:
+            return "dist1"
+        else:
+            return "dist0"
+
+    def sonar2dist(self, dist):
+        if dist > 1.0:
+            return "dist6"
+        elif dist > 0.609:
+            return "dist5"
+        elif dist > 0.444:
+            return "dist4"
+        elif dist > 0.33:
+            return "dist3"
+        elif dist > 0.217:
+            return "dist2"
+        elif dist > 0.137:
+            return "dist1"
+        else:
+            return "dist0"
+        
+    def process_percepts(self, percepts):
+        vision = percepts['vision']
+        vision_dist = self.vision2dist(vision[1])
+        sonar_left_dist = self.sonar2dist(percepts['left'])
+        sonar_center_dist = self.sonar2dist(percepts['center'])
+        sonar_right_dist = self.sonar2dist(percepts['right'])
+        
+        percept = '['
+        percept += 'sonar({0}, {1}, {2})'.format(sonar_left_dist,
+                                                 sonar_center_dist,
+                                                 sonar_right_dist)
+        if vision != ('',0,0,0) and vision[3] > 1.5*vision[1]:
+            # bottle in front of wall is seen
+            vision_pred = f'vision( {vision[0]}, {vision_dist})'
+            percept += ', '
+            percept += vision_pred
+        percept += ']'
+
+        if percept != self._last_percept_str:
+            self.send_percept(percept)
+            self._last_percept_str = percept
 
 def redis_control():
     '''
@@ -303,3 +358,14 @@ def pedro_control():
     # wait for and process initialize_ message
     vrep_pedro.process_initialize()
     vrep_pedro.run()
+
+def teleo_control():
+    '''
+       Like pedro_control except distances are abstracted
+    '''
+
+    print('teleor controller active')
+    vrep_teleo = TeleoControl()
+    # wait for and process initialize_ message
+    vrep_teleo.process_initialize()
+    vrep_teleo.run()

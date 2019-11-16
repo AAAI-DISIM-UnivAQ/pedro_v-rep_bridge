@@ -1,0 +1,103 @@
+
+% the distances used in sonar and vision are from the emumeration
+% dist0, dist1, dist2, dist3, dist4, dist5, dist6
+% where dist0 is very close and dist6 is the largest distance
+% sonar( L, C, R ) , Left, Center and Right sensor readings
+% assuming all are from the distance enumeration
+% vision ( Direction, Dist ) red bottle detection
+% Direction: center|left|right
+% Dist is from the distance enumeration
+
+def durative ::=
+    move_forward(num) | turn_right(num) | turn_left(num) | display(num)
+
+def visdir ::= left|right|center
+
+def distance ::= dist0 | dist1 | dist2 | dist3 | dist4 | dist5 | dist6
+
+percept sonar( distance, distance, distance ), vision( visdir, distance)
+
+rel larger_dist(distance, distance)
+larger_dist(dist1, dist0)
+larger_dist(dist2, dist0)
+larger_dist(dist2, dist1)
+larger_dist(dist3, dist0)
+larger_dist(dist3, dist1)
+larger_dist(dist3, dist2)
+larger_dist(dist4, dist0)
+larger_dist(dist4, dist1)
+larger_dist(dist4, dist2)
+larger_dist(dist4, dist3)
+larger_dist(dist5, dist0)
+larger_dist(dist5, dist1)
+larger_dist(dist5, dist2)
+larger_dist(dist5, dist3)
+larger_dist(dist5, dist4)
+larger_dist(dist6, dist0)
+larger_dist(dist6, dist1)
+larger_dist(dist6, dist2)
+larger_dist(dist6, dist3)
+larger_dist(dist6, dist4)
+larger_dist(dist6, dist5)
+
+rel front_free()
+front_free() <=
+    sonar(L, dist6, R) &
+    larger_dist(L, dist1) &
+    larger_dist(R, dist1)
+rel left_free()
+left_free() <=
+    sonar(L, _, R) &
+    larger_dist(L, dist4) &
+    larger_dist(L, R)
+rel right_free()
+right_free() <=
+    sonar(L, _, R) &
+    larger_dist(R, dist4) &
+    larger_dist(R, L)
+
+
+tel wander(), get_to_bottle(), approach_bottle()
+
+get_to_bottle() {
+    vision(_, _) ~> approach_bottle()
+    true  ~> [display(3):0, wander()]
+}
+
+%% precondition: vision(_, _) is true
+approach_bottle() {
+    vision(_, dist0) ~> ()++ bottle_found to vrep_pedro 
+    vision(center, _) ~>  move_forward(1)
+    vision(left, _) min_time 0.5 ~> turn_left(0.2)
+    vision(right, _) min_time 0.5 ~> turn_right(0.2)
+    }
+
+wander() {
+    front_free()  ~> move_forward(2)
+    % Just move forward when no obst in front
+
+    right_free() min_time 0.5 ~> turn_right(0.5)
+    % obst in front but none to the right, turn right so none in front
+
+    left_free() min_time 0.5 ~> turn_left(0.5)
+    % obst in front but none to the left, turn left so none in front
+
+    true min_time 2 ~>  [move_forward(-0.5):1, turn_right(0.5):1]
+    % obstacles everywhere, just go backwards and turn right
+}
+
+act go()
+go() ~>
+    start_agent( vrep_pedro, all ) ;
+% Name robot_wanderer is given to TeleoR process when launched with a command
+% teleor -Arobot_wanderer
+    start_task(wander_around, get_to_bottle());
+    stop_start()
+
+
+
+act stop_start()
+stop_start() ~>
+    get_line(L);
+    stopped to vrep_pedro; 
+    stop_start()

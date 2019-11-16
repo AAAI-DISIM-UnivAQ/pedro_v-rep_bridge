@@ -1,6 +1,6 @@
 
 from pyvrep import VRep
-
+import json
 
 class RobotModel:
     def __init__(self, name: str, api: VRep):
@@ -44,20 +44,26 @@ class PioneerP3DX(RobotModel):
 
     def right_distance(self):
         dis = self._sensors['right'].read()[1].distance()
+        while dis < 0.01:
+            dis = self._sensors['right'].read()[1].distance()
         if dis > 9999: dis = 9999
         return dis
 
     def left_distance(self):
         dis = self._sensors['left'].read()[1].distance()
+        while dis < 0.01:
+            dis = self._sensors['left'].read()[1].distance()
         if dis > 9999: dis = 9999
         return dis
 
     def center_distance(self):
         a = self._sensors['center'][0].read()[1].distance()
+        while a < 0.01:
+            a = self._sensors['center'][0].read()[1].distance()
         b = self._sensors['center'][1].read()[1].distance()
+        while b < 0.01:
+            b = self._sensors['center'][1].read()[1].distance()
         dis = min(a,b)
-        if dis == 0.0:
-            dis = max(a,b)
         if dis > 9999: dis = 9999
         return dis
 
@@ -123,7 +129,8 @@ class PioneerP3DX(RobotModel):
                'right': self.right_distance(),
                'vision': self.vision()
                }
-        print(126, 'percepts:', out)
+        #print(126, 'percepts:', out)
+        print(json.dumps(out))
         return out
 
     def get_signal(self, name):
