@@ -220,7 +220,12 @@ class PedroControl(Control):
         cmd_type = a.functor.val
         cmd = a.args[0]
         if cmd_type == 'stop_':
-            return {'cmd': 'move_forward', 'args': [0.0]}
+            if cmd.functor.val == 'move_forward':
+                return {'cmd': 'move_forward', 'args': [0.0]}
+            elif cmd.functor.val == 'turn_left':
+                return {'cmd': 'turn_left', 'args': [0.0]}
+            elif cmd.functor.val == 'turn_right':
+                return {'cmd': 'turn_right', 'args': [0.0]}
         else:
             if cmd.functor.val == 'move_forward':
                 speed = cmd.args[0].val
@@ -244,7 +249,7 @@ class TeleoControl(PedroControl):
     def vision2dist(self, width) :
         if width > 0.23:
             return "dist0"
-        elif width > 0.1875:
+        elif width > 0.1563:   #elif width > 0.1875:
             return "dist1"
         elif width > 0.125:
             return "dist2"
@@ -281,7 +286,7 @@ class TeleoControl(PedroControl):
         percept += 'sonar({0}, {1}, {2})'.format(sonar_left_dist,
                                                  sonar_center_dist,
                                                  sonar_right_dist)
-        if vision[1] > 0.03 or vision[1] > 0 and vision[3] > 1.5*vision[1]:
+        if vision[1] > 0.2 or vision[1] > 0 and vision[3] > 1.5*vision[1]:
             # bottle in front of wall is seen
             vision_dist = self.vision2dist(vision[1])
             vision_pred = f'vision( {vision[0]}, {vision_dist})'
