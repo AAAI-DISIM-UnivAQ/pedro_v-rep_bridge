@@ -207,25 +207,23 @@ class PedroControl(Control):
             msg = p2pmsg.args[2]
             actions = msg
             if isinstance(actions, pedroclient.PList):
-                for a in actions.toList():
-                    cmds.append(self.action_to_command(a))
+                action_list =  actions.toList()
+                for a in action_list:
+                    cmds.append(self.action_to_command(a, len(action_list)))
             if 'stopped' in str(msg) or 'bottle_found' in str(msg):
                 self._stop = True
             else:
                 print(164, actions)
         return cmds
 
-    def action_to_command(self, a):
+    def action_to_command(self, a, num_actions):
         print(181, str(a))
         cmd_type = a.functor.val
         cmd = a.args[0]
         if cmd_type == 'stop_':
-            if cmd.functor.val == 'move_forward':
+            if num_actions == 1:
+                # only do a stop if the only action
                 return {'cmd': 'move_forward', 'args': [0.0]}
-            elif cmd.functor.val == 'turn_left':
-                return {'cmd': 'turn_left', 'args': [0.0]}
-            elif cmd.functor.val == 'turn_right':
-                return {'cmd': 'turn_right', 'args': [0.0]}
         else:
             if cmd.functor.val == 'move_forward':
                 speed = cmd.args[0].val
