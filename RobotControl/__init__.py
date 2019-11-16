@@ -251,11 +251,11 @@ class TeleoControl(PedroControl):
             return "dist0"
         elif width > 0.1563:   #elif width > 0.1875:
             return "dist1"
-        elif width > 0.125:
+        elif width > 0.124:
             return "dist2"
-        elif width > 0.09375:
+        elif width > 0.09374:
             return "dist3"
-        elif width > 0.0625:
+        elif width > 0.0624:
             return "dist4"
         else:
             return "dist5"
