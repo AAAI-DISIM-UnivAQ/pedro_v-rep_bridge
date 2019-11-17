@@ -97,7 +97,7 @@ approach_bottle() {
     
     %% wiggle away from wall
     vision(center, _) & close_wall(Dir) min_time 3 ~>
-            [turn(op_dir(Dir),0.4):1, move_forward(1.4):1, turn(Dir,0.4):1]
+            [turn(op_dir(Dir),0.1):1, move_forward(1.0):1, turn(Dir,0.1):1]
 
     %% turn away from left wall
     close_wall(Dir) min_time 0.4 ~> turn(op_dir(Dir),0.2)
@@ -128,7 +128,7 @@ wander() {
     %% to do this we ned the turn right speed/time to be callibrated 
     %% so that turning at this speed to the given time will produce
     %% about a 180 turn
-    cornered() min_time 4 ~> [move_forward(-0.2):2, turn(random_dir(), 0.6):2]
+    cornered() min_time 4 ~> [move_forward(-0.3):2, turn(random_dir(), 0.4):2]
 
     %% move away fom wall
     close_wall(Dir) min_time 0.2 ~> turn(op_dir(Dir),0.2)
@@ -137,9 +137,7 @@ wander() {
     %% we are not cornered or close to a wall on the left or right
     %% but there is a close wall in front - e.g a doorway
     sonar(_, C, _) &  larger_dist(dist4, C) min_time 3 ~> 
-            [move_forward(-0.3):1, turn(random_dir(), 0.3):1, move_forward(0.3)]
-       
-
+            [move_forward(-0.4):1, turn(random_dir(), 0.2):1, move_forward(0.4):1]
     true ~> move_forward(1)
     
     }
