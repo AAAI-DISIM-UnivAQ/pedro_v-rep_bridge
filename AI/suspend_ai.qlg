@@ -1,0 +1,9 @@
+act suspend()
+suspend() ~>
+    write_list(["Press RETURN to suspend simulation (non-empty line to terminate): "], stderr);
+    get_line(L);
+    stopped to vrep_pedro; 
+    case { 
+        L = "\n" ~> suspend()
+        true ~> exit()
+        }
