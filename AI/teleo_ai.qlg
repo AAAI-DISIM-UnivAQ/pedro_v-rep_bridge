@@ -9,9 +9,11 @@
 % Dist is from the distance enumeration
 
 def durative ::=
-    move_forward(num) | turn_right(num) | turn_left(num) | display(num)
+    move_forward(num) | turn(turn_dir, num) | display(num)
 
 def visdir ::= close|left|right|center
+
+def turn_dir ::= left | right
 
 def distance ::= dist0 | dist1 | dist2 | dist3 | dist4 | dist5 | dist6
 
@@ -58,92 +60,86 @@ larger_dist(dist6, dist5)
 %     larger_dist(R, dist4) &
 %     larger_dist(R, L)
 
-rel close_wall_left(), close_wall_right(),  cornered()
+rel close_wall(?turn_dir), close_wall_right(),  cornered()
 
 %% wall at distance dist0, dist1, dist2, dist3
-close_wall_left() <=
-    sonar(R, _, _) & larger_dist(dist4, R)
-close_wall_right() <=
-    sonar(_, _, R) & larger_dist(dist4, R)
+close_wall(left) <=
+    sonar(R, _, _) & larger_dist(dist4, R) & not vision(left, _)
+close_wall(right) <=
+    sonar(_, _, R) & larger_dist(dist4, R) & not vision(right, _)
 
-%% same as close_wall_left() & close_wall_right()
 cornered() <=
-    sonar(L, _, R) &
-    larger_dist(dist4, L) &
-    larger_dist(dist4, R)
+    close_wall(left) &
+    close_wall(right)
 
-rel can_approach_bottle(visdir, distance)
-
-%% The robot can approach the bottle if the bottle is close
-%% or the bottle is in the center or if the sonar does not detect anything
-%% closer in the center direction.
-
-can_approach_bottle(close, _)
-can_approach_bottle(center, _)
-can_approach_bottle(_, Dist) <=
-    sonar(_, Dist, _)
-can_approach_bottle(_, Dist) <=
-    sonar(_, C, _) &
-    larger_dist(C, Dist)
-
-    
+   
 
 tel wander(), get_to_bottle(), approach_bottle()
 
 get_to_bottle() {
     %% the bottle is seen and can be approached without hitting a wall
-    vision(Dir, Dist) & can_approach_bottle(Dir, Dist) ~> approach_bottle()
+    vision(_, _) ~> approach_bottle()
     
-    %% also perhaps a rule like
-    %% vision(_, _) ~> avoiding_approach()
     
     %% if the above rule is added then this rule would be for searching 
     %% for a bottle
     true  ~> wander()
 }
 
-%% precondition: vision(_, _) is true and bottle can be approached
+fun op_dir(turn_dir) -> turn_dir
+op_dir(left) -> right
+op_dir(right) -> left
+
+%% precondition: vision(_, _) is true 
 approach_bottle() {
     %% next to bottle - finished
     vision(_, dist0) ~> ()++ bottle_found to vrep_pedro 
     
+    %% wiggle away from wall
+    vision(center, _) & close_wall(Dir) min_time 3 ~>
+            [turn(op_dir(Dir),0.4):1, move_forward(1.4):1, turn(Dir,0.4):1]
+
     %% turn away from left wall
-    close_wall_left() min_time 0.4 ~> turn_right(0.2)
-    
-    %% turn away from right wall
-    close_wall_right() min_time 0.4 ~> turn_left(0.2)
+    close_wall(Dir) min_time 0.4 ~> turn(op_dir(Dir),0.2)
     
     %%move towards bottle in center
-    vision(center, _) ~>  move_forward(1)
+    vision(center, _) ~>  move_forward(0.5)
     
     %% turn towards bottle
-    vision(left, _)  min_time 0.7 ~> turn_left(0.2)
-    vision(right, _) min_time 0.7 ~> turn_right(0.2)
+    vision(left, D)  min_time 0.4 ~> turn(left, approach_roatation_speed(D))
+    
+    vision(right, D)  min_time 0.4 ~> turn(right, approach_roatation_speed(D))
     }
+
+fun approach_roatation_speed(distance) -> num
+approach_roatation_speed(dist0) -> 0.0
+approach_roatation_speed(dist1) -> 0.05
+approach_roatation_speed(dist2) -> 0.1
+approach_roatation_speed(dist3) -> 0.15
+approach_roatation_speed(dist4) -> 0.2
+approach_roatation_speed(dist5) -> 0.4
+
+fun random_dir() -> turn_dir
+random_dir() :: random_num() > 0.5 -> left
+random_dir() -> right
 
 wander() {
     %% to escape a corner it would be good to turn 180 and move away
     %% to do this we ned the turn right speed/time to be callibrated 
     %% so that turning at this speed to the given time will produce
     %% about a 180 turn
-    cornered() min_time 3 ~> [turn_right(0.4):2, move_forward(0.2)]
+    cornered() min_time 4 ~> [move_forward(-0.2):2, turn(random_dir(), 0.6):2]
 
     %% move away fom wall
-    close_wall_left() min_time 0.5 ~> turn_right(0.2)
+    close_wall(Dir) min_time 0.2 ~> turn(op_dir(Dir),0.2)
 
-    close_wall_right() min_time 0.5 ~> turn_left(0.2)
     
     %% we are not cornered or close to a wall on the left or right
     %% but there is a close wall in front - e.g a doorway
     sonar(_, C, _) &  larger_dist(dist4, C) min_time 3 ~> 
-            [move_forward(-0.3):1, turn_right(0.3):1, move_forward(0.3)]
+            [move_forward(-0.3):1, turn(random_dir(), 0.3):1, move_forward(0.3)]
        
-    % sonar(L, _, R) & larger_dist(L, R)  min_time 0.5 ~> 
-    %         turn_left(0.2)
-    
-    % sonar(L, _, R) & larger_dist(R, L)  min_time 0.5 ~>
-    %         turn_right(0.2)
-    
+
     true ~> move_forward(1)
     
     }
@@ -160,6 +156,6 @@ go() ~>
 
 act stop_start()
 stop_start() ~>
-    get_line(L);
+    get_line(_);
     stopped to vrep_pedro; 
     stop_start()

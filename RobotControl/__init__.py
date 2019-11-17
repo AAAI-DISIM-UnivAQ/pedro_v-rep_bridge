@@ -228,12 +228,12 @@ class PedroControl(Control):
             if cmd.functor.val == 'move_forward':
                 speed = cmd.args[0].val
                 return {'cmd': 'move_forward', 'args': [speed]}
-            elif cmd.functor.val == 'turn_left':
-                speed = cmd.args[0].val
-                return {'cmd': 'turn_left', 'args': [speed]}
-            elif cmd.functor.val == 'turn_right':
-                speed = cmd.args[0].val
-                return {'cmd': 'turn_right', 'args': [speed]}
+            elif cmd.functor.val == 'turn':
+                speed = cmd.args[1].val
+                if cmd.args[0].val == 'left':
+                    return {'cmd': 'turn_left', 'args': [speed]}
+                else:
+                    return {'cmd': 'turn_right', 'args': [speed]}
             elif cmd.functor.val == 'display':
                 task_num = cmd.args[0].val
                 return {'cmd': 'display', 'args': [task_num]}
@@ -274,6 +274,21 @@ class TeleoControl(PedroControl):
         else:
             return "dist0"
         
+    def process_initialize(self):
+        # Block unitil message arrives
+        p2pmsg = self.queue.get()
+        print(p2pmsg)
+        message = p2pmsg.args[2]
+        if str(message) == 'initialise_':
+            # get the sender address
+            percepts_addr = p2pmsg.args[1]
+            print("percepts_addr", str(percepts_addr))
+            self.set_client(percepts_addr)
+            init_percepts = '[]'
+            self.send_percept(init_percepts)
+        else:
+            print("Didn't get initialise_ message")
+            
     def process_percepts(self, percepts):
         vision = percepts['vision']
         sonar_left_dist = self.sonar2dist(percepts['left'])
@@ -368,7 +383,7 @@ def teleo_control():
     '''
 
     print('teleor controller active')
-    vrep_teleo = TeleoControl(sleep_time=0.1)
+    vrep_teleo = TeleoControl(sleep_time=0.05)
     # wait for and process initialize_ message
     vrep_teleo.process_initialize()
     vrep_teleo.run()

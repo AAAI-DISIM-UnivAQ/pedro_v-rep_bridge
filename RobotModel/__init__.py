@@ -1,6 +1,7 @@
 
 from pyvrep import VRep
 import json
+import time
 
 class RobotModel:
     def __init__(self, name: str, api: VRep):
@@ -43,26 +44,32 @@ class PioneerP3DX(RobotModel):
         self._actuators['right'].set_target_velocity(right)
 
     def right_distance(self):
-        dis = self._sensors['right'].read()[1].distance()
-        while dis < 0.01:
+        for _ in range(5):
+            # try to read sensor up to 5 times
             dis = self._sensors['right'].read()[1].distance()
+            if dis > 0.01:
+                break
+            time.sleep(0.005)
         if dis > 9999: dis = 9999
         return dis
 
     def left_distance(self):
-        dis = self._sensors['left'].read()[1].distance()
-        while dis < 0.01:
+        for _ in range(5):
+            # try to read sensor up to 5 times
             dis = self._sensors['left'].read()[1].distance()
+            if dis > 0.01:
+                break
+            time.sleep(0.005)
         if dis > 9999: dis = 9999
         return dis
 
     def center_distance(self):
-        a = self._sensors['center'][0].read()[1].distance()
-        while a < 0.01:
+        for _ in range(5):
             a = self._sensors['center'][0].read()[1].distance()
-        b = self._sensors['center'][1].read()[1].distance()
-        while b < 0.01:
             b = self._sensors['center'][1].read()[1].distance()
+            if a > 0.01 and b > 0.01:
+                break
+            time.sleep(0.005)
         dis = min(a,b)
         if dis > 9999: dis = 9999
         return dis
