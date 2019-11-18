@@ -15,6 +15,6 @@ from RobotControl import demo_control, keyboard_control, redis_control, pedro_co
 
 if __name__ == '__main__':
     #demo_control()
-    #keyboard_control()
+    keyboard_control()
     #pedro_control()
-    teleo_control()
+    #teleo_control()

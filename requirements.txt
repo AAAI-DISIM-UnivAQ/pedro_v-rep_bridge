@@ -1,2 +1,3 @@
 git+https://github.com/AAAI-DISIM-UnivAQ/vrep-api-python.git
 redis
+pygame

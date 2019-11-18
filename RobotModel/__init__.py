@@ -1,5 +1,6 @@
 
 from pyvrep import VRep
+from WorldModel import WorldModel
 import json
 import time
 
@@ -9,6 +10,7 @@ class RobotModel:
         self._name = name
         self._sensors = None    # some kind of collection class
         self._actuators = None  # idem
+        self._world = WorldModel()
 
 class PioneerP3DX(RobotModel):
 
@@ -23,6 +25,7 @@ class PioneerP3DX(RobotModel):
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
         self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor6")
         self._sensors['vision'] = api.sensor.vision("Vision_sensor")
+        self._last_commands = None
 
     def turn_right(self, speed=2.0):
         print('turn_right', speed)
@@ -138,6 +141,7 @@ class PioneerP3DX(RobotModel):
                }
         #print(126, 'percepts:', out)
         print(json.dumps(out))
+        self._world.robot_updates(self._last_commands, out)
         return out
 
     def get_signal(self, name):
@@ -145,7 +149,7 @@ class PioneerP3DX(RobotModel):
         return signalValue
 
     def process_commands(self, commands):
-        # print(commands)
+        self._last_commands = commands
         for cmd in commands:
             self.invoke(cmd['cmd'], cmd['args'])
 
