@@ -64,7 +64,7 @@ rel close_wall(?turn_dir), close_wall_right(),  cornered()
 
 %% wall at distance dist0, dist1, dist2, dist3
 close_wall(left) <=
-    sonar(R, _, _) & larger_dist(dist4, R) & not vision(left, _)
+    sonar(L, _, _) & larger_dist(dist4, L) & not vision(left, _)
 close_wall(right) <=
     sonar(_, _, R) & larger_dist(dist4, R) & not vision(right, _)
 

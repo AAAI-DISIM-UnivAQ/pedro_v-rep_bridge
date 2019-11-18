@@ -3,6 +3,9 @@ from pyvrep import VRep
 import json
 import time
 
+SENSOR_RETRY = 40
+SENSOR_RETRY_SLEEP = 0.01
+
 class RobotModel:
     def __init__(self, name: str, api: VRep):
         self._api = api
@@ -23,6 +26,7 @@ class PioneerP3DX(RobotModel):
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
         self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor6")
         self._sensors['vision'] = api.sensor.vision("Vision_sensor")
+        self._set_two_motor(0.0, 0.0)
 
     def turn_right(self, speed=2.0):
         print('turn_right', speed)
@@ -44,32 +48,32 @@ class PioneerP3DX(RobotModel):
         self._actuators['right'].set_target_velocity(right)
 
     def right_distance(self):
-        for _ in range(5):
+        for _ in range(SENSOR_RETRY):
             # try to read sensor up to 5 times
             dis = self._sensors['right'].read()[1].distance()
             if dis > 0.01:
                 break
-            time.sleep(0.005)
+            time.sleep(SENSOR_RETRY_SLEEP)
         if dis > 9999: dis = 9999
         return dis
 
     def left_distance(self):
-        for _ in range(5):
+        for _ in range(SENSOR_RETRY):
             # try to read sensor up to 5 times
             dis = self._sensors['left'].read()[1].distance()
             if dis > 0.01:
                 break
-            time.sleep(0.005)
+            time.sleep(SENSOR_RETRY_SLEEP)
         if dis > 9999: dis = 9999
         return dis
 
     def center_distance(self):
-        for _ in range(5):
+        for _ in range(SENSOR_RETRY):
             a = self._sensors['center'][0].read()[1].distance()
             b = self._sensors['center'][1].read()[1].distance()
             if a > 0.01 and b > 0.01:
                 break
-            time.sleep(0.005)
+            time.sleep(SENSOR_RETRY_SLEEP)
         dis = min(a,b)
         if dis > 9999: dis = 9999
         return dis
