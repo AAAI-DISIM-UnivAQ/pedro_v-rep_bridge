@@ -38,6 +38,7 @@ class Control(object):
                 perceptions = r.get_percepts()
                 self.process_percepts(perceptions)
                 time.sleep(self._sleep_time)
+                r.move_forward(0)
                 # print(f'sim state: {api.simxGetSimulationState("")}')
                 simStop = False
                 if self._stop or simStop:
@@ -94,7 +95,7 @@ class DemoControl(Control):
 
 
 class KeyboardControl(Control):
-    def __init__(self, host='127.0.0.1', port=19997, sleep_time=0.01):
+    def __init__(self, host='127.0.0.1', port=19997, sleep_time=10):
         super().__init__(host, port, sleep_time)
         self._rl = 0 # right sensor reading
         self._ll = 0 # left
@@ -117,9 +118,9 @@ class KeyboardControl(Control):
         if command[0] .lower() == 'w':
             return [{'cmd': 'move_forward', 'args': [0.5]}]
         elif command[0] .lower() == 'd':
-            return [{'cmd': 'turn_right', 'args': [0.2]}]
+            return [{'cmd': 'turn_right', 'args': [1]}]
         elif command[0].lower() == 'a':
-            return [{'cmd': 'turn_left', 'args': [0.2]}]
+            return [{'cmd': 'turn_left', 'args': [1]}]
         elif command[0].lower() == 's':
             return [{'cmd': 'move_forward', 'args': [-0.5]}]
 

@@ -7,10 +7,10 @@ from math import sin, cos, pi
 '''
 
 WORLD_SIZE = 500
+REAL_SPACE_SPAN = 10 # meters
 ORIGIN = [int(WORLD_SIZE/2), int(WORLD_SIZE/2)]
 BLACK = (0, 0, 0)
-MOTION_STEP = 0.5 # minimal mostion step in the internal representation
-
+RESOLUTION = REAL_SPACE_SPAN/WORLD_SIZE  # meters x pixel 0.1 mxp
 
 import pygame
 
@@ -54,11 +54,9 @@ class WorldModel:
         else:
             cmd = self._last_cmd
         if cmd['cmd'] == 'move_forward':
-            dis = cmd['args'][0]
-#            self._translation = (int(dis * cos(self._heading) / MOTION_STEP),
-#                                 int(dis * sin(self._heading) / MOTION_STEP))
-            self._translation = (dis * cos(self._heading),
-                                 dis * sin(self._heading))
+            speed = cmd['args'][0] / RESOLUTION # in pixels x second
+            self._translation = (speed * cos(self._heading),
+                                 speed * sin(self._heading))
         elif cmd['cmd'] == 'turn_right':
             angle = cmd['args'][0]
             self._heading += angle

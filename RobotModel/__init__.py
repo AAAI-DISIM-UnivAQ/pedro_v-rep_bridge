@@ -25,6 +25,7 @@ class PioneerP3DX(RobotModel):
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
         self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor6")
         self._sensors['vision'] = api.sensor.vision("Vision_sensor")
+        self._set_two_motor(0.0, 0.0)
         self._last_commands = None
 
     def turn_right(self, speed=2.0):
