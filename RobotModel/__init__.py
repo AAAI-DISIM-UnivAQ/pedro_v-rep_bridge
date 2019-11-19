@@ -145,7 +145,8 @@ class PioneerP3DX(RobotModel):
         return out
 
     def get_signal(self, name):
-        returnCode, signalValue = self._api.simxGetIntegerSignal(0, name, 0)
+        #returnCode, signalValue = self._api.simxGetIntegerSignal(0, name, 0)
+        signalValue = 0
         return signalValue
 
     def process_commands(self, commands):
