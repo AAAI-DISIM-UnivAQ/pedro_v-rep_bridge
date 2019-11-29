@@ -2,11 +2,11 @@
 
 ## General sequence in Windows
 
-    Install PEDRO setup from PEDRO web site
-    Install QuProlog setup from QuProlog web site
-    Update your PATH environment to include pedro  and QuProlog/bin folder
-    Install QuLog/Teleor binary installer taken from this moodle server
-    Update your PATH environment to include qulog/bin folder
+* Install PEDRO setup from PEDRO web site
+* Install QuProlog setup from QuProlog web site
+* Update your PATH environment to include pedro  and QuProlog/bin folder
+* Install QuLog/Teleor binary installer taken from this moodle server
+* Update your PATH environment to include qulog/bin folder
 
 ## Detailed sequence for Linux:
 
