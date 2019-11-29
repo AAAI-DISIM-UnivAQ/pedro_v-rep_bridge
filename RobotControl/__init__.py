@@ -33,6 +33,7 @@ class Control(object):
     def run(self):
         with self._api as api:
             r = self.make_robot(api)
+            r.move_forward(0)
             while True:
                 r.process_commands(self.get_commands())
                 perceptions = r.get_percepts()
@@ -95,7 +96,7 @@ class DemoControl(Control):
 
 
 class KeyboardControl(Control):
-    def __init__(self, host='127.0.0.1', port=19997, sleep_time=10):
+    def __init__(self, host='127.0.0.1', port=19997, sleep_time=1):
         super().__init__(host, port, sleep_time)
         self._rl = 0 # right sensor reading
         self._ll = 0 # left
