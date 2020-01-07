@@ -11,6 +11,7 @@ import pedroclient
 import queue
 import threading
 
+#TODO: split center sensor in center_left and center_right sensor in teleor_contro and demo_control
 
 class Control(object):
     def __init__(self, host, port, sleep_time):
@@ -33,12 +34,12 @@ class Control(object):
     def run(self):
         with self._api as api:
             r = self.make_robot(api)
-            r.move_forward(0)
             while True:
-                r.process_commands(self.get_commands())
+                te = r.process_commands(self.get_commands())
+                t = time.process_time() #in seconds
                 perceptions = r.get_percepts()
                 self.process_percepts(perceptions)
-                time.sleep(self._sleep_time)
+                time.sleep(self._sleep_time - ((time.process_time()-t)+te))
                 r.move_forward(0)
                 # print(f'sim state: {api.simxGetSimulationState("")}')
                 simStop = False
@@ -96,11 +97,12 @@ class DemoControl(Control):
 
 
 class KeyboardControl(Control):
-    def __init__(self, host='127.0.0.1', port=19997, sleep_time=1):
+    def __init__(self, host='127.0.0.1', port=19997, sleep_time=2):
         super().__init__(host, port, sleep_time)
         self._rl = 0 # right sensor reading
         self._ll = 0 # left
-        self._cl = 0 # center
+        self._cl_rl = 0 # center right
+        self._cl_ll = 0 # center left
 
     def make_robot(self, api):
         return PioneerP3DX('Pioneer_p3dx', api)
@@ -108,7 +110,8 @@ class KeyboardControl(Control):
     def process_percepts(self, percepts):
         self._ll = percepts['left']
         self._rl = percepts['right']
-        self._cl = percepts['center']
+        self._cl_rl = percepts['center_right']
+        self._cl_ll = percepts['center_left']
 
     def get_commands(self):
         self._api.simulation.pause()
@@ -117,13 +120,13 @@ class KeyboardControl(Control):
         if len(command)==0:
             return []
         if command[0] .lower() == 'w':
-            return [{'cmd': 'move_forward', 'args': [0.5]}]
+            return [{'cmd': 'move_forward', 'args': [1]}]
         elif command[0] .lower() == 'd':
-            return [{'cmd': 'turn_right', 'args': [1]}]
+            return [{'cmd': 'turn_right', 'args': [0.5]}]
         elif command[0].lower() == 'a':
-            return [{'cmd': 'turn_left', 'args': [1]}]
+            return [{'cmd': 'turn_left', 'args': [0.5]}]
         elif command[0].lower() == 's':
-            return [{'cmd': 'move_forward', 'args': [-0.5]}]
+            return [{'cmd': 'move_forward', 'args': [-1]}]
 
 
 # Handling messages from the TR program
