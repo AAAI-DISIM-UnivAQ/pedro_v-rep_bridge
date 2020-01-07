@@ -1,3 +1,4 @@
+import math
 
 from pyvrep import VRep
 from WorldModel import WorldModel
@@ -25,6 +26,7 @@ class PioneerP3DX(RobotModel):
         self._sensors['center'] = (api.sensor.proximity(name+"_ultrasonicSensor4"), api.sensor.proximity(name+"_ultrasonicSensor5"))
         self._sensors['right'] = api.sensor.proximity(name+"_ultrasonicSensor6")
         self._sensors['vision'] = api.sensor.vision("Vision_sensor")
+        self._sensors['compass'] = api.sensor.position("Pioneer_p3dx")
         self._set_two_motor(0.0, 0.0)
         self._last_commands = None
 
@@ -50,33 +52,80 @@ class PioneerP3DX(RobotModel):
     def right_distance(self):
         for _ in range(5):
             # try to read sensor up to 5 times
-            dis = self._sensors['right'].read()[1].distance()
+            a  = self._sensors['right'].read()
+            coord = a[1]
+            dis = coord.distance()
             if dis > 0.01:
                 break
             time.sleep(0.005)
+
+        # take the distance when the read state is true(it is true only if sensor detects some objects)
+        if a[0]:
+            coord = a[1]
+            dis = coord.distance()
+        else:
+            dis = 1
+            coord = None
         if dis > 9999: dis = 9999
-        return dis
+        return dis, coord
 
     def left_distance(self):
         for _ in range(5):
             # try to read sensor up to 5 times
-            dis = self._sensors['left'].read()[1].distance()
+            a = self._sensors['left'].read()
+            coord = a[1]
+            dis = coord.distance()
             if dis > 0.01:
                 break
             time.sleep(0.005)
-        if dis > 9999: dis = 9999
-        return dis
 
-    def center_distance(self):
+        # take the distance when the read state is true(it is true only if sensor detects some objects)
+        if a[0]:
+            coord = a[1]
+            dis = coord.distance()
+        else:
+            dis = 1
+            coord = None
+        if dis > 9999: dis = 9999
+        return dis, coord
+
+    def center_left_distance(self):
         for _ in range(5):
-            a = self._sensors['center'][0].read()[1].distance()
-            b = self._sensors['center'][1].read()[1].distance()
-            if a > 0.01 and b > 0.01:
+            # try to read sensor up to 5 times
+            a = self._sensors['center'][0].read()
+            coord = a[1]
+            dis = coord.distance()
+            if dis > 0.01:
                 break
             time.sleep(0.005)
-        dis = min(a,b)
+            # take the distance when the read state is true(it is true only if sensor detects some objects)
+            if a[0]:
+                coord = a[1]
+                dis = coord.distance()
+            else:
+                dis = 1
+                coord = None
         if dis > 9999: dis = 9999
-        return dis
+        return dis, coord
+
+    def center_right_distance(self):
+        for _ in range(5):
+            # try to read sensor up to 5 times
+            a = self._sensors['center'][1].read()
+            coord = a[1]
+            dis = coord.distance()
+            if dis > 0.01:
+                break
+            time.sleep(0.005)
+        # take the distance when the read state is true(it is true only if sensor detects some objects)
+        if a[0]:
+            coord = a[1]
+            dis = coord.distance()
+        else:
+            dis = 1
+            coord = None
+        if dis > 9999: dis = 9999
+        return dis, coord
 
     def display(self, code):
         # res = self._api.simxCallScriptFunction(0, 'debug', self._api.sim_scripttype_mainscript,
@@ -113,16 +162,18 @@ class PioneerP3DX(RobotModel):
             if blob_count>0:
                 # print('blobs: ', blob_count)
                 blob_size = blob_data[6]  # red blob width
-                blob_base = blob_data[5] - blob_data[7]/2.0
+                blob_base = blob_data[5] - blob_data[7]/2.0 #yposition - half height =bottle y center coordinate
                 blob_height = blob_data[7]
                 print(f'blob_size:{blob_size}')
                 if blob_size >= SIZE_THR:
                     return "close", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
-                if 0.35 < blob_data[4] < 0.65:
-                    return "center", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
-                if 0.0 < blob_data[4] < 0.35:
+                if 0.0 <= blob_data[4] <= 0.25:
                     return "left", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
-                if 0.65 < blob_data[4] < 1:
+                if 0.25 < blob_data[4] <= 0.5:
+                    return "center_left", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
+                if 0.5 < blob_data[4] <= 0.75:
+                    return "center_right", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
+                if 0.75 < blob_data[4] <= 1:
                     return "right", round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
             return position, round(blob_size, 5), round(blob_base, 3), round(blob_height, 3)
         else:
@@ -130,30 +181,38 @@ class PioneerP3DX(RobotModel):
 
     def vision(self):
         code, state, vision_result = self._sensors['vision'].read()
+        print("Vision Result: ", vision_result)
         position, size, base, height = self.get_vision(vision_result)
         out = (position, size, base, height)
         return out
 
+    def compass(self):
+        orientation = self._sensors['compass'].get_orientation().get_gamma()
+        print("Compass orientation: ", orientation)
+        return orientation
+
     def get_percepts(self):
         out = {'left': self.left_distance(),
-               'center': self.center_distance(),
+               'center_left': self.center_left_distance(),
+               'center_right': self.center_right_distance(),
                'right': self.right_distance(),
-               'vision': self.vision()
+               'vision': self.vision(),
+               'compass': self.compass()
                }
-        #print(126, 'percepts:', out)
-        print(json.dumps(out))
+        print(126, 'percepts:', out)
         self._world.robot_updates(self._last_commands, out)
         return out
 
     def get_signal(self, name):
-        #returnCode, signalValue = self._api.simxGetIntegerSignal(0, name, 0)
         signalValue = 0
         return signalValue
 
     def process_commands(self, commands):
+        t = time.process_time()
         self._last_commands = commands
         for cmd in commands:
             self.invoke(cmd['cmd'], cmd['args'])
+        return  time.process_time() - t
 
     def invoke(self, cmd, args):
         # print('invoke', cmd, args)
