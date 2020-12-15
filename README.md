@@ -13,6 +13,9 @@ Coppelia Robotics robot simulator, PEDRO server and QuLog/Teleor clients are nee
 -  http://www.coppeliarobotics.com/
 -  http://github.com/AAAI-DISIM-UnivAQ/vrep-api-python
 -  http://staff.itee.uq.edu.au/pjr/HomePages/PedroHome.html
+    - remember in Ubuntu:
+        - autoreconf -f -i 
+        - sudo apt-get install texinfo
 -  http://staff.itee.uq.edu.au/pjr/HomePages/QulogHome.html 
    - (also install the required QuProlog compiler)
 -  http://redis.io  (optional)
