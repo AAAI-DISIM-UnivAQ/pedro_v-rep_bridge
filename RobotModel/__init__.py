@@ -1,21 +1,23 @@
 
-from pyvrep import VRep
+from pycsim import CSim
 import json
 import time
 
 SENSOR_RETRY = 40
 SENSOR_RETRY_SLEEP = 0.01
 
+
 class RobotModel:
-    def __init__(self, name: str, api: VRep):
+    def __init__(self, name: str, api: CSim):
         self._api = api
         self._name = name
         self._sensors = None    # some kind of collection class
         self._actuators = None  # idem
 
+
 class PioneerP3DX(RobotModel):
 
-    def __init__(self, name: str, api: VRep):
+    def __init__(self, name: str, api: CSim):
         RobotModel.__init__(self, name, api)
         self._actuators = {}
         self._sensors = {}

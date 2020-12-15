@@ -4,7 +4,9 @@
     (Redis and/or PEDRO)
 '''
 
-from RobotModel import PioneerP3DX, VRep
+from RobotModel import PioneerP3DX
+from pycsim import CSim
+
 import time
 # from redis import Redis
 import pedroclient
@@ -20,7 +22,7 @@ class Control(object):
         self._last_percept_str = ''
         self._stop = False
         try:
-            self._api = VRep.connect(self._host, self._port)
+            self._api = CSim.connect(self._host, self._port)
             # number returnCode=simxSetIntegerSignal(number clientID,string signalName,number signalValue,number operationMode)
             # self._api.simxSetIntegerSignal(0, 'stop_loop', 0, 0)
         except AttributeError as e:
