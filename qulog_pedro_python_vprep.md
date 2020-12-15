@@ -1,8 +1,9 @@
 # How to start the QuLOG-PEDRO-Python-VREP simulation
 
-Download this repo [http://github.com/AAAI-DISIM-UnivAQ/pedro_v-rep_bridge](http://github.com/AAAI-DISIM-UnivAQ/pedro_v-rep_bridge)
+Download this repo 
+[http://github.com/AAAI-DISIM-UnivAQ/pedro_c-sim_bridge](http://github.com/AAAI-DISIM-UnivAQ/pedro_c-sim_bridge)
 
-1. have VREP working
+1. have Coppelia SIM working
 
    use the "scene.ttt" virtual robotics scene file
 	
